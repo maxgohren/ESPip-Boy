@@ -1,5 +1,35 @@
 ### July 2025
 
+# July 13 2025 - Friday 04:21 PM
+GPS testing! [BE-180 GNSS Module](https://www.beitian.com/en/sys-pd/522.html)
+* GPS TX -> ESP32 RX haha, not TX to TX!
+* Don't use SoftwareSerial, use HardwareSerial as ESP32 has multiple
+* GPS needs to fix, even if PPS/TX are blinking, still may not have a fix: 2-5
+  mins outside
+Hardware was super easy to setup, the module includes some cables that all
+I needed to do was strip and slip into the breadboard. I've never worked with
+serial communication though, so I made the mistake of connecting TX to TX haha.
+
+Software was simple as well, I just changed the pins to 16 as this is the
+UART2RX (Second Hardware Serial module on the ESP32). Adapted the 
+[Arduino Get Started GPS
+code](https://arduinogetstarted.com/tutorials/arduino-gps).
+I was getting garbage, so ChatGPT helped me with changed the baud rate to see
+which one would be correct, and it turns out 384800 works for me. I thought it
+would be selectable through the code but perhaps the machine is hardcoded for
+a speed until otherwise. 
+* Installed TinyGPSPlus by Mikal Hart. 
+
+After about an hour and a half of tinkering and vibe coding, I was able to
+translate the coords given from the BE-180 to my live location at 
+[GPS Coords and Map](https://www.gps-coordinates.net/). 
+This concludes the hardware validation for my GPS App. 
+The next step will be downloading map data and then rendering it with
+a position marker. But let's not get ahead of ourselves 😈.
+
+
+Another one bites the DUST!!!
+
 # July 11 2025 - Friday 06:40 PM
 
 Got the LSM303 (GY-511 package) working!  
