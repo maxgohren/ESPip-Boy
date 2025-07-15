@@ -1,5 +1,22 @@
 ### July 2025
 
+# July 14 2025 - Monday 11:35 PM
+
+Attempted to get the TFT display working, but no luck. Only a small lighting of
+the display backlight upon grazing a random pin with a jumper cable.
+
+My issue I learned is my breadboard is too small for my curent esp32 dev module,
+which is wide enough that only 1 strip of holes is available on one side.
+Documentation is also a little scarce, but there are enough YouTube videos
+that I am confident I can get it to work. 
+
+I will acquire a larger breadboard so that I can be confident in my
+connections instead of holding 3 jumpers against 3 different pins!!!
+
+[TFT Hardware
+Setup](https://www.youtube.com/watch?v=3rDjwMwcFRs&ab_channel=DoIt.20)
+
+
 # July 13 2025 - Friday 04:21 PM
 GPS testing! [BE-180 GNSS Module](https://www.beitian.com/en/sys-pd/522.html)
 * GPS TX -> ESP32 RX haha, not TX to TX!
