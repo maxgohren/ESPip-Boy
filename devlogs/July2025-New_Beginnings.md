@@ -1,5 +1,32 @@
 ### July 2025
 
+# July 16 2025 - Wednesday 7:16 PM
+RAHH! Started the PCB Design!
+
+Working on [Robert Feranac's EasyEDA ESP32 Dev Board
+tutorial](https://www.bing.com/videos/riverview/relatedvideo?q=robert+feranec+esp32+tutorital&&mid=9FBE4342DA6A0779318D9FBE4342DA6A0779318D&FORM=VAMGZC).
+It's a daunting 3 hour video, but it is a necessary watch for me. I have never
+done a PCB design **EVER**, and this will be a great experience for me. It
+seems simple enough to take smaller projects like a development board and
+tacking on my modifications for my smart watch: sensors, LED flashlights,
+displays!
+
+So far I got through 25 minutes of laying out components and starting to label
+the ESP32 module. I have learned a lot about choosing the components
+themselves, and started understanding enough to ask how/why we choose
+components. Why certain sizes? What limitations do we have as PCB designers? 
+
+I do like EasyEDA as it is connected to JLCPCB's inventory so you can see price
+and inventory right when you choose components, and with just one click you can
+see how one seemingly identical capacitor can be 10 times as expensive as it's
+counterpart. 
+
+This PCB design is the scariest, most daunting part of this project. So much to
+learn, so much time to wait and money to be spent on developing, making
+mistakes, fixing them and trying again...
+
+Despite all that, I am so happy to have finally started the process!
+
 # July 16 2025 - Wednesday 5:08 PM
 Two hours later... got the TFT Display working!
 
