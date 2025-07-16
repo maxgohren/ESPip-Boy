@@ -1,5 +1,69 @@
 ### July 2025
 
+# July 16 2025 - Wednesday 5:08 PM
+Two hours later... got the TFT Display working!
+
+I had a lot of difficulty with this, simply trying different wiring
+configurations over and over and different code. I tried the Adafruit library
+and the TFT_eSPI library.
+
+Turns out you need to understand the libraries you work with! The TFT_eSPI
+library requires the user to fill out User_Setup.h to provide the pins they
+used for the display. Once I filled this out, I can now use any example in the
+library and it works great!
+
+Also, there is a helpful diagnostic tool that reads the user setup out to you
+while writing the whole display red. Here is the pin config that worked for me.
+I referred to the previously linked ESP32 datasheet to use proper SPI pins for
+CLK and MOSI, but the file already had suitable pins anyways.
+
+[code]
+TFT_eSPI ver = 2.5.43
+Processor    = ESP32
+Frequency    = 240MHz
+Transactions = Yes
+Interface    = SPI
+Display driver = 7789
+Display width  = 240
+Display height = 280
+
+R0 y offset = 20
+MOSI    = GPIO 23 // marked SDA on board
+MISO    = GPIO 19 // my board does not have one of these
+SCK     = GPIO 18 // marked SCL on board
+TFT_CS   = GPIO 15 
+TFT_DC   = GPIO 2
+                  // maybe not necessary in this library but I have 
+                  // RES pin -> pin D4
+
+Font GLCD   loaded
+Font 2      loaded
+Font 4      loaded
+Font 6      loaded
+Font 7      loaded
+Font 8      loaded
+Smooth font enabled
+
+Display SPI frequency = 27.00
+[/code]
+
+The display runs great! Animations and frame rate are very
+smooth, I am very happy with today's work. 
+
+I forgot to mention that I solved July 14th's problem of not having a big
+enough breadboard that by cutting mine in half... with an exacto knife haha.
+Took me 20 mins but well worth it, I can now properly use all of the pins with
+the breadboard instead of having them unavailable due to the width of the
+board.
+
+### Today's Lessons
+* Do not use the Dupont connectors I have lying around (I did not crimp them
+  properly and they are unreliable - remove them and just use the solid core
+wire)
+* RTFM (always)
+* Display runs fine on 3.3V
+* BLK pin can be tied to 3.3V for constant max backlight brightness
+
 # July 14 2025 - Monday 11:35 PM
 
 Attempted to get the TFT display working, but no luck. Only a small lighting of
