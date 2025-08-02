@@ -1,5 +1,3 @@
-### July 2025
-
 # July 16 2025 - Wednesday 7:16 PM
 RAHH! Started the PCB Design!
 
