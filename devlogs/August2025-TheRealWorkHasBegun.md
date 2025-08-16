@@ -24,6 +24,10 @@ multitasking.
 
 Now that I understand the EC11, I will make my schematic for it!
 
+* [ESP_Knob Lib](https://github.com/esp-arduino-libs/ESP32_Knob)
+* [Button Tutorial](https://docs.arduino.cc/tutorials/generic/digital-input-pullup/)
+* [Incremental Encoders and Quadrature Encoding Wikipedia Page](https://en.wikipedia.org/wiki/Incremental_encoder)
+
 # August 1 2025 - Saturday 4:18 PM
 
   It is now August and I can say the real work has begun. The spectactular
