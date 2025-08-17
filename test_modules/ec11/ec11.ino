@@ -1,10 +1,10 @@
 #include <Arduino.h>
 #include <ESP_Knob.h>
 
-#define GPIO_NUM_KNOB_PIN_A     25
-#define GPIO_NUM_KNOB_PIN_B     27
+#define GPIO_NUM_KNOB_PIN_A     35
+#define GPIO_NUM_KNOB_PIN_B     34
 #define LED 2
-#define ROTARY_SWITCH 26
+#define ROTARY_SWITCH 32
 
 ESP_Knob *knob;
 
@@ -54,8 +54,9 @@ void setup() {
 
 void loop() {
   int sensorValue = digitalRead(ROTARY_SWITCH);
-  if (sensorValue == LOW)
+  if (sensorValue == LOW){
+    Serial.println("LED ON");
     digitalWrite(LED, HIGH);
-  else (sensorValue == HIGH);
+  } else (sensorValue == HIGH);
     digitalWrite(LED, LOW);
 }

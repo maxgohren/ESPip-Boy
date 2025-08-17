@@ -1,3 +1,33 @@
+# August 16 2025 - Saturday 09:39 PM
+The EC11 schematic is complete! I have wired, tested, watch an episode of
+Shogun, and drew the implementation of the EC11. Very simple, and I added +3V3
+pullups to the input pins 34 and 35 as they do not have built-in pullups. 
+
+This is an efficient use of pins because these are input only, and I won't/can't
+use these for SPI and I2C peripherals, saving GPIO resources.
+
+Currently I am researching the part of the project I understand the least about:
+LiPo/Li-Ion battery circuits. I understand I will have a Micro USB port with 5V
+going into a TP4056 charging IC with indicator LEDS. I will have this connected
+somehow? to a DW01 protection IC to stop over/undercurrent of my lipo. 
+
+The final thing I want, which is detailed nicely in this video, [Load Sharing
+with
+LiPos](https://www.youtube.com/watch?v=wy516po6uVU&ab_channel=MicroTypeEngineering)is
+load sharing. Load sharing is a concern when you are charging an integral
+battery because the charging circuit senses current to tell when the battery is
+finished charging. If you have your load connected, it will draw current and
+tell the charging IC the battery is not fully charged yet, resulting in the
+battery being constantly trickle charged when plugged in to USB. 
+
+The simplest solution presented in the video, which I would like to implement,
+is adding a transistor controlled by VBUS which disconnects the load when
+VBUS is high. 
+
+After today and seeing how comfortable I am with designing after physically
+testing, poking and prodding the components, I will order some of these
+battery ICs and LiPos in order to test and learn more about them.
+
 # August 16 2025 - Saturday 03:10 PM
 I was stuck on my EC11 schematic today, surprised at the lack of information. I
 decided, having purchased one already, the best thing would be to interface with
