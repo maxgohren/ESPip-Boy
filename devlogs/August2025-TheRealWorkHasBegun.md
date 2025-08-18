@@ -58,6 +58,28 @@ Now that I understand the EC11, I will make my schematic for it!
 * [Button Tutorial](https://docs.arduino.cc/tutorials/generic/digital-input-pullup/)
 * [Incremental Encoders and Quadrature Encoding Wikipedia Page](https://en.wikipedia.org/wiki/Incremental_encoder)
 
+# August 16 2025 - Saturday  1:12 PM
+    Wow, it's been a while. I have been super busy since I came back from
+Japan.  In order to keep the dream alive, I planned to get to work on my
+schematic and PCB this weekend and boy did I.
+
+Yesterday, I spent about 10 hours doing 2.5 hours of Robert Feranac's tutorial
+on designing an ESP32 development board schematic and doing PCB place and
+route.  What an absolute monster of a tutorial![Robert Feranac's EasyEDA ESP32
+Dev Board tutorial](https://www.bing.com/videos/riverview/relatedvideo?q=robert+feranec+esp32+tutorital&&mid=9FBE4342DA6A0779318D9FBE4342DA6A0779318D&FORM=VAMGZC).
+I can't remember the last time I focused on a project for that long in one day
+haha.
+
+But the tutorial paid off, and today I am finally working on the ESPip-Boy's
+schematic! I have copied and pasted the ESP32 board from the tutorial and
+I have added labels for the components I am missing. Mostly sensors, battery
+charging/protection and the rotary encoder switch and I am currently working
+on.  [EC11 Schematic](https://electronics.stackexchange.com/questions/512042/does-ec11-incremental-encoder-need-hardware-debouncing-and-vcc-for-encoder)
+
+![ESP32 Tutorial Dev Board Complete!](../images/2025-08-18_esp32_devboard_pcb.png)
+
+It is so exciting to finally reached this point in the project!
+
 # August 1 2025 - Saturday 4:18 PM
 
   It is now August and I can say the real work has begun. The spectactular
