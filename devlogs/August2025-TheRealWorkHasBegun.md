@@ -78,7 +78,7 @@ on.  [EC11 Schematic](https://electronics.stackexchange.com/questions/512042/doe
 
 ![ESP32 Tutorial Dev Board Complete!](../images/2025-08-18_esp32_devboard_pcb.png)
 
-It is so exciting to finally reached this point in the project!
+It is so exciting to have finally reached this point in the project!
 
 # August 1 2025 - Saturday 4:18 PM
 
