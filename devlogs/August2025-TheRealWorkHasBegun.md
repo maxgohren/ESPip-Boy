@@ -1,3 +1,50 @@
+# August 17 2025 - Sunday 08:11 PM
+Got the SD Card working! Needed to format to FAT32, as it came factory formatted as exFAT. I haven't tested the capacity yet but hopefully the 64G works, I don't see a reason why not!
+
+Test Results:
+==== ESP32 SD Thorough Test ====
+20:09:36.444 -> [BUS] Using VSPI
+20:09:36.444 -> [PINS] SCK=18  MISO=19  MOSI=23  CS=5
+20:09:36.444 -> [MOUNT] Trying SD.begin(CS=5, freq=20000000 Hz)... OK
+20:09:36.590 -> [MOUNT] Mounted successfully at 20000000 Hz
+20:09:36.590 -> [INFO ] Card Type: SDHC/SDXC (>=4GB) (code=3)
+20:09:36.590 -> [INFO ] Card Size: 58.30 GB (59700 MB)  == 62599987200 bytes
+20:09:36.590 -> [DIR] Creating dir: /test_sd ... OK
+20:09:36.638 -> [WRITE] /test_sd/hello.txt
+20:09:36.638 -> [WRITE] wrote 34 bytes
+20:09:36.638 -> [READ ] /test_sd/hello.txt
+20:09:36.638 -> [READ ] Content:
+20:09:36.686 -> -------------------------
+20:09:36.686 -> Hello from ESP32 SD test!
+20:09:36.686 -> Line 2.
+20:09:36.686 -> -------------------------
+20:09:36.686 -> [APPEND] /test_sd/hello.txt
+20:09:36.686 -> [APPEND] appended 15 bytes
+20:09:36.686 -> [LIST ] / (root, depth=2)
+20:09:36.686 -> [LIST ] Dir: /
+20:09:36.686 ->        208  autorun.inf
+20:09:36.686 ->   <DIR> System Volume Information
+20:09:36.686 -> [LIST ] Dir: System Volume Information
+20:09:36.686 -> [LIST ] Failed to open directory
+20:09:36.686 ->      34494  autorun.ico
+20:09:36.686 ->      12384  Screenshot 2025-03-08 143958.png
+20:09:36.686 ->   <DIR> test_sd
+20:09:36.686 -> [LIST ] Dir: test_sd
+20:09:36.686 -> [LIST ] Failed to open directory
+20:09:36.686 -> [RENAME] /test_sd/hello.txt -> /test_sd/renamed.txt : OK
+20:09:36.735 -> [REMOVE] /test_sd/renamed.txt : OK
+20:09:36.735 -> [BENCH ] Starting binary R/W benchmark with verification...
+20:09:36.735 -> [BENCH ] Writing 8 MiB to /bench.bin in 4096-byte chunks...
+20:09:41.996 -> [BENCH ] WRITE: 8.00 MiB in 5.26 s  =>  1.52 MiB/s
+20:09:41.996 -> [BENCH ] Reading 8 MiB back and verifying pattern...
+20:09:47.554 -> [BENCH ] READ : 8.00 MiB in 5.56 s  =>  1.44 MiB/s (verified OK)
+20:09:47.554 -> [BENCH ] bench file removed.
+20:09:47.554 -> [BENCH ] Completed successfully.
+20:09:47.554 -> 
+20:09:47.554 -> ==== Done. You can reset and re-run if needed. ====
+
+
+
 # August 16 2025 - Saturday 09:39 PM
 The EC11 schematic is complete! I have wired, tested, watch an episode of
 Shogun, and drew the implementation of the EC11. Very simple, and I added +3V3
