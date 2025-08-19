@@ -1,3 +1,11 @@
+# August 19 2025 - Tuesday 12:42 AM
+I am finally breadboarding my watch as one unit. SPI bus with SD card and TFT
+display, I2C bus with MPU 6050, light sensor and heart rate monitor. Soon I will
+reinstall my EC11 and make a menu on the TFT display for the user to select an
+app: clock, heart rate display, compass ( if I use the magnetometer chip -
+currently I have the MPU6050 installed. I want a 9 axis IMU haha ). Very
+exciting!
+
 # August 16 2025 - Saturday 09:39 PM
 The EC11 schematic is complete! I have wired, tested, watch an episode of
 Shogun, and drew the implementation of the EC11. Very simple, and I added +3V3
