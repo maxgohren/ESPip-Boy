@@ -1,3 +1,30 @@
+# August 21 2025 - Thursday 12:13 AM
+I feel like a mad scientist. Staying up late every night to work on my wonderful
+creation. It is paying off though. I have never worked so hard on something, and
+have never received such satisfaction. It is a beautiful thing.
+
+Today was spent adding a buzzer and a menu to be controlled by my EC11 rotary
+encoder. Very wonderful. I now have a menu and some 'apps' haha. A true device.
+I also spent around $60 on more components to play around with: SMD LEDs for
+flaghlights and colour, microphones, vibration motors and I almost bought a
+pieze beeper but remembered I have one. It works well!
+
+Now that the prototyping is nearing an end, with all of the complicated pieces
+working properly together, I am interested in finalizing the design so that it
+can become a nice schematic and PCB. This means the next couple of weeks will be
+a lot of researching components and deciding once and for all (at least for this
+revision) the components I will use. 
+
+I have started my document and I am comparing and contrasting different GNSS
+modules. I believe I have found my special one. The Quectel LG86. A great
+compromise between ease of use and integrated antenna. I am looking at this one
+with heart eyes because so many modules on the market do not come with an
+antenna, or have different logic levels, but this one actually fits the
+"perfect" description I made at the top of the table haha. I will keep looking,
+and if nothing beats it, I will use it in my final design!
+
+Goodnight!
+
 # August 19 2025 - Tuesday 12:42 AM
 I am finally breadboarding my watch as one unit. SPI bus with SD card and TFT
 display, I2C bus with MPU 6050, light sensor and heart rate monitor. Soon I will
