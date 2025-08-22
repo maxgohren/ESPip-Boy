@@ -1,3 +1,39 @@
+# August 21 2025 - Thursday 11:25 PM
+Today I went to work on my watch and the lack of clarity set in.
+
+Having mostly finished the prototype, it is time to move on to the next step of
+selecting a vendor, parts and designing the PCB. I dislike LCSC and will most
+likely use Digikey. 
+
+However, I have no experience designing PCBs so this part of the process is
+still scary to me. Following Robert Feranac's tutorial was great but it just
+demystified the amount of work I have to do haha. 
+
+I made my state even worse by looking for inspiration on other watches and felt
+discouraged by the Reddit comments telling unprepared and overly optimistic
+posters that unless they wanted their watch to look like a Pip-Boy they need to
+rethink their design. These are the comments that inspired the name of this
+watch, but now they are discouraging instead of inspiring me. 
+
+My main issue now is my GNSS module. I refuse to design an onboard antenna or
+even interface with a U.FL connector. This severely limits my design to
+expensive modules, with the cheaper ones being massively large. I have to
+accept these options or see if I can use an existing L1 band antenna like
+I found for the WiFi antenna.
+
+All that being said, the road ahead is new territory for me. It is unknown and
+will require lots of hard work and study to conquer the concepts and make
+a working product. I am confident though. I will take my time, take this
+weekend off for a nice fishing trip, and come back with clarity of mind to
+continue the project. 
+
+It is interesting to finally be 'sick' of the project haha, it is
+all-consuming, and the novelty of that has worn off. 
+
+I look forward to returning to the next Act of this project with renewed
+confidence :).
+
+
 # August 21 2025 - Thursday 12:13 AM
 I feel like a mad scientist. Staying up late every night to work on my wonderful
 creation. It is paying off though. I have never worked so hard on something, and
