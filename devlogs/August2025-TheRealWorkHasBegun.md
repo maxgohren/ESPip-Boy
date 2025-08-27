@@ -1,3 +1,19 @@
+# August 27 2025 - Wednesday 06:12 PM
+A light day today, just some reading and part selection for UFL antennas and
+learning that MH1 (NOT MH4) is compatible with UFL. I like the ESP32-WROOM-32UE
+with the UFL antenna, it will make my case smaller, because I won't need the PCB
+antenna sticking out over the side of the board. I can instead poke it through
+the case and then wrap it around and adhere it to the case! This should result
+in better signal as the UFL antenna's have better signal. The only problem is
+they expect 5mm of keepout area behind the case (on the inside) which is kinda
+goofy. I'll have to see if that is necessary or I can just avoid it. If I can't,
+I may just use the 5mm of PCB antenna then on the inside.
+
+I also did some reading and found some resources about USBC. I would like to
+have it on my board but there are obviously some more complicated design
+considerations, but I believe it is only adding a pull-down resistor to a CC
+line (what is a CC line?) and connecting the pairs of D+/D- lines together.
+
 # August 27 2025 - Wednesday 12:48 AM
 A nice night working on A2DP connectivity with the SD card. Works OK-ish. I can
 literally block the signal with my hand, and "wearing" (holding the breadboard
