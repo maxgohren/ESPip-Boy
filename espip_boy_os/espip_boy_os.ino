@@ -7,6 +7,23 @@
 #include <TFT_eSPI.h>       // Hardware-specific library
 #include <JPEGDecoder.h>
 
+#include "AudioTools.h"
+#include "AudioTools/AudioLibs/A2DPStream.h"
+#include "AudioTools/AudioCodecs/CodecMP3Helix.h"
+//#include "AudioTools/AudioLibs/AudioBoardStream.h" // for SPI pins
+
+File file;
+MP3DecoderHelix mp3;  // or change to MP3DecoderMAD
+EncodedAudioStream decoder(&file, &mp3);
+BluetoothA2DPSource a2dp_source;
+
+// callback used by A2DP to provide the sound data - usually len is 128 2 channel int16 frames
+int32_t get_sound_data(uint8_t* data, int32_t size) {
+  int32_t result = decoder.readBytes((uint8_t*)data, size);
+  delay(1); // feed the dog
+  return result;
+}
+
 
 #include "pitches.h"
 // notes in the melody:
@@ -96,11 +113,101 @@ enum app {
 int menuState = 0;
 int appState = MENU;
 
+
+void onKnobLeftEventCallback(int count, void *usr_data)
+{
+    if(appState == MENU){
+      if(count < 0 || menuState < 0)
+        menuState = 0;
+      else
+        menuState = count % MAX_MENU;
+    }
+    Serial.printf("Detect left event, count is %d, menuState %d\n", count, menuState);
+}
+
+void onKnobRightEventCallback(int count, void *usr_data)
+{
+    if(appState == MENU){
+      if(count >= MAX_MENU || menuState >= MAX_MENU)
+        menuState = MAX_MENU;
+      else
+        menuState = count % MAX_MENU; //need a way to control count, really hard to use this library
+    }
+    Serial.printf("Detect right event, count is %d menuState %d\n", count, menuState);
+}
+
+void onKnobHighLimitEventCallback(int count, void *usr_data)
+{
+    Serial.printf("Detect high limit event, count is %d menuState %d\n", count, menuState);
+}
+
+void onKnobLowLimitEventCallback(int count, void *usr_data)
+{
+    Serial.printf("Detect low limit event, count is %d menuState %d\n", count, menuState);
+}
+
+void onKnobZeroEventCallback(int count, void *usr_data)
+{
+    Serial.printf("Detect zero event, count is %d menuState %d\n", count, menuState);
+}
+
+void initKnob(){
+  knob = new ESP_Knob(GPIO_NUM_KNOB_PIN_A, GPIO_NUM_KNOB_PIN_B);
+  // knob->invertDirection();
+    knob->begin();
+    knob->attachLeftEventCallback(onKnobLeftEventCallback);
+    knob->attachRightEventCallback(onKnobRightEventCallback);
+    knob->attachHighLimitEventCallback(onKnobHighLimitEventCallback);
+    knob->attachLowLimitEventCallback(onKnobLowLimitEventCallback);
+    knob->attachZeroEventCallback(onKnobZeroEventCallback);
+
+    pinMode(GPIO_NUM_KNOB_SWITCH, INPUT_PULLUP);
+}
+
+void initSDCard(){
+   // Set all chip selects high to avoid bus contention during initialisation of each peripheral
+  digitalWrite(15, HIGH); // TFT screen chip select
+  digitalWrite( 5, HIGH); // SD card chips select, must use GPIO 5 (ESP32 SS)
+
+  if (!SD.begin(5, tft.getSPIinstance())) {
+    Serial.println("Card Mount Failed");
+    tft.println("Card Mount Failed");
+    return;
+  }
+  uint8 cardType = SD.cardType();
+
+  if (cardType == CARD_NONE) {
+    Serial.println("NO SD Card Attached");
+    tft.println("No SD Card Attached");
+    return;
+  }
+  Serial.print("SD Card Type: ");
+  if (cardType == CARD_MMC) {
+    Serial.println("MMC");
+  } else if (cardType == CARD_SD) {
+    Serial.println("SDSC");
+  } else if (cardType == CARD_SDHC) {
+    Serial.println("SDHC");
+  } else {
+    Serial.println("UNKNOWN");
+  }
+
+  uint64_t cardSize = SD.cardSize() / (1024 * 1024);
+  Serial.printf("SD Card Size: %lluMB\n", cardSize);
+
+  Serial.println("initialisation done.");
+
+
+
+  //testSDCard();
+}
+
 void setup() {
   Serial.begin(115200);
   Wire.begin(SDA, SCL);
   initKnob();
 
+  
   tft.init();
   tft.fillScreen(TFT_BLACK);
   tft.setCursor(0, 20, 4);
@@ -111,6 +218,27 @@ void setup() {
   delay(2000);
 
   initSDCard();
+
+  // Music AFTER SD card because we need to init SD first
+  AudioToolsLogger.begin(Serial, AudioToolsLogLevel::Info);
+  file = SD.open("/gavin_adcock_loose_strings.mp3", FILE_READ);
+  if (!file) {
+    Serial.println("file failed");
+    stop();
+  }
+   // make sure we have enough space for the pcm data
+  decoder.transformationReader().resizeResultQueue(1024 * 8);
+  if (!decoder.begin()) {
+    Serial.println("decoder failed");
+    stop();
+  }
+  // start the bluetooth
+  Serial.println("starting A2DP...");
+  a2dp_source.set_data_callback(get_sound_data);
+  a2dp_source.start("H1");
+  //a2dp_source.start("Max’s AirPods");
+  //a2dp_source.start("esp32");
+  
 
   tft.init();
   tft.fillScreen(TFT_BLACK);
@@ -140,6 +268,7 @@ void loop() {
   //i2c_scan();
   check_rotary_knob_state();
   updateApp();
+ 
 }
 
 void updateApp(){
@@ -216,42 +345,7 @@ void drawCube(){
   cubeLoop();
 }
 
-void onKnobLeftEventCallback(int count, void *usr_data)
-{
-    if(appState == MENU){
-      if(count < 0 || menuState < 0)
-        menuState = 0;
-      else
-        menuState = count % MAX_MENU;
-    }
-    Serial.printf("Detect left event, count is %d, menuState %d\n", count, menuState);
-}
 
-void onKnobRightEventCallback(int count, void *usr_data)
-{
-    if(appState == MENU){
-      if(count >= MAX_MENU || menuState >= MAX_MENU)
-        menuState = MAX_MENU;
-      else
-        menuState = count % MAX_MENU; //need a way to control count, really hard to use this library
-    }
-    Serial.printf("Detect right event, count is %d menuState %d\n", count, menuState);
-}
-
-void onKnobHighLimitEventCallback(int count, void *usr_data)
-{
-    Serial.printf("Detect high limit event, count is %d menuState %d\n", count, menuState);
-}
-
-void onKnobLowLimitEventCallback(int count, void *usr_data)
-{
-    Serial.printf("Detect low limit event, count is %d menuState %d\n", count, menuState);
-}
-
-void onKnobZeroEventCallback(int count, void *usr_data)
-{
-    Serial.printf("Detect zero event, count is %d menuState %d\n", count, menuState);
-}
 
 void check_rotary_knob_state(){
   static int lastButtonState = HIGH;
@@ -275,18 +369,7 @@ void check_rotary_knob_state(){
   lastButtonState = buttonState;
 }
 
-void initKnob(){
-  knob = new ESP_Knob(GPIO_NUM_KNOB_PIN_A, GPIO_NUM_KNOB_PIN_B);
-  // knob->invertDirection();
-    knob->begin();
-    knob->attachLeftEventCallback(onKnobLeftEventCallback);
-    knob->attachRightEventCallback(onKnobRightEventCallback);
-    knob->attachHighLimitEventCallback(onKnobHighLimitEventCallback);
-    knob->attachLowLimitEventCallback(onKnobLowLimitEventCallback);
-    knob->attachZeroEventCallback(onKnobZeroEventCallback);
 
-    pinMode(GPIO_NUM_KNOB_SWITCH, INPUT_PULLUP);
-}
 
 void i2c_scan(){
   byte error, address;
@@ -316,43 +399,7 @@ void i2c_scan(){
   }
 }
 
-void initSDCard(){
-   // Set all chip selects high to avoid bus contention during initialisation of each peripheral
-  digitalWrite(15, HIGH); // TFT screen chip select
-  digitalWrite( 5, HIGH); // SD card chips select, must use GPIO 5 (ESP32 SS)
 
-  if (!SD.begin(5, tft.getSPIinstance())) {
-    Serial.println("Card Mount Failed");
-    tft.println("Card Mount Failed");
-    return;
-  }
-  uint8 cardType = SD.cardType();
-
-  if (cardType == CARD_NONE) {
-    Serial.println("NO SD Card Attached");
-    tft.println("No SD Card Attached");
-    return;
-  }
-  Serial.print("SD Card Type: ");
-  if (cardType == CARD_MMC) {
-    Serial.println("MMC");
-  } else if (cardType == CARD_SD) {
-    Serial.println("SDSC");
-  } else if (cardType == CARD_SDHC) {
-    Serial.println("SDHC");
-  } else {
-    Serial.println("UNKNOWN");
-  }
-
-  uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-  Serial.printf("SD Card Size: %lluMB\n", cardSize);
-
-  Serial.println("initialisation done.");
-
-
-
-  testSDCard();
-}
 
 void testSDCard(){
   tft.setRotation(2);  // portrait

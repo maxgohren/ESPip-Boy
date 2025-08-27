@@ -1,3 +1,35 @@
+# August 27 2025 - Wednesday 12:48 AM
+A nice night working on A2DP connectivity with the SD card. Works OK-ish. I can
+literally block the signal with my hand, and "wearing" (holding the breadboard
+		in my hand and fake jogging) the watch on the left side of my body is
+almost no connection while the right side is fine. I guess that's where the
+receiver is on my headphones. I gotta say, for just a bare ESP32 chip with a PCB
+antenna, it's "good enough". I am interested in investigating external antennas?
+Perhaps they will have better performance for my use case. 
+
+Also did some research on PMICs. I found ( ChatGPT told me) the Analog Devices
+ADP5360. A great charging chip with a fuel guage, battery protection and power
+supply through buck and buck-boost convertors. I also found the MAX17XXX
+something that has a (much?) better fuel guage as a seperate chip with time to
+full and time to empty estimates. I would need to do my own battery protection
+and charging and buck though, so IDK if this is worth it. I will do some more
+research.
+
+So much research!
+
+
+# August 25 2025 - Monday 11:25 PM
+Back in the saddle. I had a great weekend fishing trip with the family and it
+was wonderfully refreshing. The lack of clarity I felt earlier is gone, the
+mission is now to diffuse the cloud and start moving in measured steps.
+
+I am now choosing components. I have finally settled on mostly every feature I
+want in my watch now and the prototyping is finished. It is now time to dial in
+each component so that I may start working on my schematic. 
+
+I am making a list of part numbers, features they implement, current and voltage
+figures for rough power estimates etc. I am so excited once again!
+
 # August 21 2025 - Thursday 11:25 PM
 Today I went to work on my watch and the lack of clarity set in.
 
