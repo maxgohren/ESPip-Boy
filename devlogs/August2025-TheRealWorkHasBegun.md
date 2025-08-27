@@ -1,3 +1,139 @@
+
+
+# August 27 2025 - Wednesday 12:48 AM
+A nice night working on A2DP connectivity with the SD card. Works OK-ish. I can
+literally block the signal with my hand, and "wearing" (holding the breadboard
+		in my hand and fake jogging) the watch on the left side of my body is
+almost no connection while the right side is fine. I guess that's where the
+receiver is on my headphones. I gotta say, for just a bare ESP32 chip with a PCB
+antenna, it's "good enough". I am interested in investigating external antennas?
+Perhaps they will have better performance for my use case. 
+
+Also did some research on PMICs. I found ( ChatGPT told me) the Analog Devices
+ADP5360. A great charging chip with a fuel guage, battery protection and power
+supply through buck and buck-boost convertors. I also found the MAX17XXX
+something that has a (much?) better fuel guage as a seperate chip with time to
+full and time to empty estimates. I would need to do my own battery protection
+and charging and buck though, so IDK if this is worth it. I will do some more
+research.
+
+So much research!
+
+
+# August 25 2025 - Monday 11:25 PM
+Back in the saddle. I had a great weekend fishing trip with the family and it
+was wonderfully refreshing. The lack of clarity I felt earlier is gone, the
+mission is now to diffuse the cloud and start moving in measured steps.
+
+I am now choosing components. I have finally settled on mostly every feature I
+want in my watch now and the prototyping is finished. It is now time to dial in
+each component so that I may start working on my schematic. 
+
+I am making a list of part numbers, features they implement, current and voltage
+figures for rough power estimates etc. I am so excited once again!
+
+# August 21 2025 - Thursday 11:25 PM
+Today I went to work on my watch and the lack of clarity set in.
+
+Having mostly finished the prototype, it is time to move on to the next step of
+selecting a vendor, parts and designing the PCB. I dislike LCSC and will most
+likely use Digikey. 
+
+However, I have no experience designing PCBs so this part of the process is
+still scary to me. Following Robert Feranac's tutorial was great but it just
+demystified the amount of work I have to do haha. 
+
+I made my state even worse by looking for inspiration on other watches and felt
+discouraged by the Reddit comments telling unprepared and overly optimistic
+posters that unless they wanted their watch to look like a Pip-Boy they need to
+rethink their design. These are the comments that inspired the name of this
+watch, but now they are discouraging instead of inspiring me. 
+
+My main issue now is my GNSS module. I refuse to design an onboard antenna or
+even interface with a U.FL connector. This severely limits my design to
+expensive modules, with the cheaper ones being massively large. I have to
+accept these options or see if I can use an existing L1 band antenna like
+I found for the WiFi antenna.
+
+All that being said, the road ahead is new territory for me. It is unknown and
+will require lots of hard work and study to conquer the concepts and make
+a working product. I am confident though. I will take my time, take this
+weekend off for a nice fishing trip, and come back with clarity of mind to
+continue the project. 
+
+It is interesting to finally be 'sick' of the project haha, it is
+all-consuming, and the novelty of that has worn off. 
+
+I look forward to returning to the next Act of this project with renewed
+confidence :).
+
+
+# August 21 2025 - Thursday 12:13 AM
+I feel like a mad scientist. Staying up late every night to work on my wonderful
+creation. It is paying off though. I have never worked so hard on something, and
+have never received such satisfaction. It is a beautiful thing.
+
+Today was spent adding a buzzer and a menu to be controlled by my EC11 rotary
+encoder. Very wonderful. I now have a menu and some 'apps' haha. A true device.
+I also spent around $60 on more components to play around with: SMD LEDs for
+flaghlights and colour, microphones, vibration motors and I almost bought a
+pieze beeper but remembered I have one. It works well!
+
+Now that the prototyping is nearing an end, with all of the complicated pieces
+working properly together, I am interested in finalizing the design so that it
+can become a nice schematic and PCB. This means the next couple of weeks will be
+a lot of researching components and deciding once and for all (at least for this
+revision) the components I will use. 
+
+I have started my document and I am comparing and contrasting different GNSS
+modules. I believe I have found my special one. The Quectel LG86. A great
+compromise between ease of use and integrated antenna. I am looking at this one
+with heart eyes because so many modules on the market do not come with an
+antenna, or have different logic levels, but this one actually fits the
+"perfect" description I made at the top of the table haha. I will keep looking,
+and if nothing beats it, I will use it in my final design!
+
+Goodnight!
+
+# August 19 2025 - Tuesday 12:42 AM
+I am finally breadboarding my watch as one unit. SPI bus with SD card and TFT
+display, I2C bus with MPU 6050, light sensor and heart rate monitor. Soon I will
+reinstall my EC11 and make a menu on the TFT display for the user to select an
+app: clock, heart rate display, compass ( if I use the magnetometer chip -
+currently I have the MPU6050 installed. I want a 9 axis IMU haha ). Very
+exciting!
+>>>>>>> 2ea2c7dbe329c0270c9c23a1b5f4df88c1e44207
+
+# August 16 2025 - Saturday 09:39 PM
+The EC11 schematic is complete! I have wired, tested, watch an episode of
+Shogun, and drew the implementation of the EC11. Very simple, and I added +3V3
+pullups to the input pins 34 and 35 as they do not have built-in pullups. 
+
+This is an efficient use of pins because these are input only, and I won't/can't
+use these for SPI and I2C peripherals, saving GPIO resources.
+
+Currently I am researching the part of the project I understand the least about:
+LiPo/Li-Ion battery circuits. I understand I will have a Micro USB port with 5V
+going into a TP4056 charging IC with indicator LEDS. I will have this connected
+somehow? to a DW01 protection IC to stop over/undercurrent of my lipo. 
+
+The final thing I want, which is detailed nicely in this video, [Load Sharing
+with
+LiPos](https://www.youtube.com/watch?v=wy516po6uVU&ab_channel=MicroTypeEngineering)is
+load sharing. Load sharing is a concern when you are charging an integral
+battery because the charging circuit senses current to tell when the battery is
+finished charging. If you have your load connected, it will draw current and
+tell the charging IC the battery is not fully charged yet, resulting in the
+battery being constantly trickle charged when plugged in to USB. 
+
+The simplest solution presented in the video, which I would like to implement,
+is adding a transistor controlled by VBUS which disconnects the load when
+VBUS is high. 
+
+After today and seeing how comfortable I am with designing after physically
+testing, poking and prodding the components, I will order some of these
+battery ICs and LiPos in order to test and learn more about them.
+
 # August 17 2025 - Sunday 08:11 PM
 Got the SD Card working! Needed to format to FAT32, as it came factory formatted as exFAT. I haven't tested the capacity yet but hopefully the 64G works, I don't see a reason why not!
 
@@ -43,38 +179,6 @@ Test Results:
 20:09:47.554 -> 
 20:09:47.554 -> ==== Done. You can reset and re-run if needed. ====
 
-
-
-# August 16 2025 - Saturday 09:39 PM
-The EC11 schematic is complete! I have wired, tested, watch an episode of
-Shogun, and drew the implementation of the EC11. Very simple, and I added +3V3
-pullups to the input pins 34 and 35 as they do not have built-in pullups. 
-
-This is an efficient use of pins because these are input only, and I won't/can't
-use these for SPI and I2C peripherals, saving GPIO resources.
-
-Currently I am researching the part of the project I understand the least about:
-LiPo/Li-Ion battery circuits. I understand I will have a Micro USB port with 5V
-going into a TP4056 charging IC with indicator LEDS. I will have this connected
-somehow? to a DW01 protection IC to stop over/undercurrent of my lipo. 
-
-The final thing I want, which is detailed nicely in this video, [Load Sharing
-with
-LiPos](https://www.youtube.com/watch?v=wy516po6uVU&ab_channel=MicroTypeEngineering)is
-load sharing. Load sharing is a concern when you are charging an integral
-battery because the charging circuit senses current to tell when the battery is
-finished charging. If you have your load connected, it will draw current and
-tell the charging IC the battery is not fully charged yet, resulting in the
-battery being constantly trickle charged when plugged in to USB. 
-
-The simplest solution presented in the video, which I would like to implement,
-is adding a transistor controlled by VBUS which disconnects the load when
-VBUS is high. 
-
-After today and seeing how comfortable I am with designing after physically
-testing, poking and prodding the components, I will order some of these
-battery ICs and LiPos in order to test and learn more about them.
-
 # August 16 2025 - Saturday 03:10 PM
 I was stuck on my EC11 schematic today, surprised at the lack of information. I
 decided, having purchased one already, the best thing would be to interface with
@@ -104,6 +208,28 @@ Now that I understand the EC11, I will make my schematic for it!
 * [ESP_Knob Lib](https://github.com/esp-arduino-libs/ESP32_Knob)
 * [Button Tutorial](https://docs.arduino.cc/tutorials/generic/digital-input-pullup/)
 * [Incremental Encoders and Quadrature Encoding Wikipedia Page](https://en.wikipedia.org/wiki/Incremental_encoder)
+
+# August 16 2025 - Saturday  1:12 PM
+    Wow, it's been a while. I have been super busy since I came back from
+Japan.  In order to keep the dream alive, I planned to get to work on my
+schematic and PCB this weekend and boy did I.
+
+Yesterday, I spent about 10 hours doing 2.5 hours of Robert Feranac's tutorial
+on designing an ESP32 development board schematic and doing PCB place and
+route.  What an absolute monster of a tutorial![Robert Feranac's EasyEDA ESP32
+Dev Board tutorial](https://www.bing.com/videos/riverview/relatedvideo?q=robert+feranec+esp32+tutorital&&mid=9FBE4342DA6A0779318D9FBE4342DA6A0779318D&FORM=VAMGZC).
+I can't remember the last time I focused on a project for that long in one day
+haha.
+
+But the tutorial paid off, and today I am finally working on the ESPip-Boy's
+schematic! I have copied and pasted the ESP32 board from the tutorial and
+I have added labels for the components I am missing. Mostly sensors, battery
+charging/protection and the rotary encoder switch and I am currently working
+on.  [EC11 Schematic](https://electronics.stackexchange.com/questions/512042/does-ec11-incremental-encoder-need-hardware-debouncing-and-vcc-for-encoder)
+
+![ESP32 Tutorial Dev Board Complete!](../images/2025-08-18_esp32_devboard_pcb.png)
+
+It is so exciting to have finally reached this point in the project!
 
 # August 1 2025 - Saturday 4:18 PM
 
