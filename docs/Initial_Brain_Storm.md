@@ -1,7 +1,8 @@
-
 # Inspiration
 https://github.com/Bellafaire/ESP32-Smart-Watch
 [Making DIY Smart Watch with ESP32 - Designing Smart Watch Faces](https://circuitdigest.com/microcontroller-projects/designing-smartwatch-using-esp32)
+[ZSWatch]([https://github.com/ZSWatch/ZSWatch?tab=readme-ov-file#hardware)
+[mike-rankin/ESP32-S3_1.69inch_Cap_Touch](https://github.com/mike-rankin/ESP32-S3_1.69inch_Cap_Touch)
 # Research Questions
 ## Straight up JARVIS Voice Control
 1. 🟨Text-to-speech synthesizer? 

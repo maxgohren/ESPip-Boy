@@ -30,16 +30,19 @@ LRA is linear resonance, need haptic driver to maintain PWM and offload from mai
 eccentric rotating mass is cheaper and easier to drive, but mushier
 # External PSRAM
 https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/external-ram.html
-# Micro Rotary Encoder
-We can't use the EC11 it's monstrous
+#  UI Control
+### Micro Rotary Encoder
+We can't use the EC11 it's monstrous, honestly they all are...
 [9.5mm ec11](https://www.aliexpress.com/item/1005008519804850.html?spm=a2g0o.productlist.main.22.5e9941ecAEnuMs&algo_pvid=0bc1c7cb-d9ec-45e0-acd0-5aba4e3c7000&algo_exp_id=0bc1c7cb-d9ec-45e0-acd0-5aba4e3c7000-21&pdp_ext_f=%7B%22order%22%3A%225%22%2C%22eval%22%3A%221%22%7D&pdp_npi=6%40dis%21CAD%212.89%212.14%21%21%212.04%211.51%21%402103245417561740992276230e0091%2112000045534565973%21sea%21CA%21895251878%21X%211%210%21n_tag%3A-29919%3Bd%3Afbd1bb7%3Bm03_new_user%3A-29895&curPageLogUid=RRHP5xd4aRrQ&utparam-url=scene%3Asearch%7Cquery_from%3A%7Cx_object_id%3A1005008519804850%7C_p_origin_prod%3A)
 [Mouse wheel encoder](https://www.aliexpress.com/item/32360048492.html?spm=a2g0o.detail.pcDetailBottomMoreOtherSeller.14.66f3BM6cBM6cnY&gps-id=pcDetailBottomMoreOtherSeller&scm=1007.40050.354490.0&scm_id=1007.40050.354490.0&scm-url=1007.40050.354490.0&pvid=b4653ad8-7c58-496e-a97d-fb6d39e69a61&_t=gps-id:pcDetailBottomMoreOtherSeller,scm-url:1007.40050.354490.0,pvid:b4653ad8-7c58-496e-a97d-fb6d39e69a61,tpp_buckets:668%232846%238110%231995&isseo=y&pdp_ext_f=%7B%22order%22%3A%22142%22%2C%22eval%22%3A%221%22%2C%22sceneId%22%3A%2230050%22%7D&pdp_npi=6%40dis%21CAD%212.76%212.40%21%21%211.95%211.70%21%402101effb17561751372727582ef282%2112000017941569939%21rec%21CA%21895251878%21X%211%210%21n_tag%3A-29919%3Bd%3Afbd1bb7%3Bm03_new_user%3A-29895%3BpisId%3A5000000179765277&utparam-url=scene%3ApcDetailBottomMoreOtherSeller%7Cquery_from%3A%7Cx_object_id%3A32360048492%7C_p_origin_prod%3A)
 [up down and press switch](https://www.aliexpress.com/item/4000697123862.html?spm=a2g0o.detail.pcDetailBottomMoreOtherSeller.22.66f3BM6cBM6cnY&gps-id=pcDetailBottomMoreOtherSeller&scm=1007.40050.354490.0&scm_id=1007.40050.354490.0&scm-url=1007.40050.354490.0&pvid=b4653ad8-7c58-496e-a97d-fb6d39e69a61&_t=gps-id:pcDetailBottomMoreOtherSeller,scm-url:1007.40050.354490.0,pvid:b4653ad8-7c58-496e-a97d-fb6d39e69a61,tpp_buckets:668%232846%238110%231995&isseo=y&pdp_ext_f=%7B%22order%22%3A%22344%22%2C%22eval%22%3A%221%22%2C%22sceneId%22%3A%2230050%22%7D&pdp_npi=6%40dis%21CAD%212.85%212.74%21%21%212.01%211.93%21%402101effb17561751372727582ef282%2110000006104988133%21rec%21CA%21895251878%21X%211%210%21n_tag%3A-29919%3Bd%3Afbd1bb7%3Bm03_new_user%3A-29895&utparam-url=scene%3ApcDetailBottomMoreOtherSeller%7Cquery_from%3A%7Cx_object_id%3A4000697123862%7C_p_origin_prod%3A)
-# PCB Design Videos
-https://www.youtube.com/watch?v=AJ8TMgo7eG0&ab_channel=ForceTronics
-https://www.youtube.com/watch?v=_Hfzq1QES-Q&ab_channel=Phil%E2%80%99sLab
-https://www.youtube.com/watch?v=YtmQzJX09Lo&ab_channel=SentineoEmbeddedElectronics
-https://www.youtube.com/watch?v=hkSad4n76Lc&ab_channel=CosplayLightandSound
+### Touchscreen
+Need touchscreen display but I've always wanted one
+### Buttons 
+2 pins for 2 buttons or matrix of 4 buttons with still just 2 pins, very effective
+
+### Joysticks
+5 button control, Left-Right-Up-Down-Middle, lots of pins and medium size
 
 # Power Management IC
 
