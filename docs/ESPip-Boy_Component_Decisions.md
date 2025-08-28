@@ -90,6 +90,16 @@ Only a couple dollars for the 16MB flash version compared to the 4MB flash versi
 https://www.lcsc.com/product-detail/C701346.html?s_z=n_ESPRESSIF%2520ESP32-WROOM
 https://www.lcsc.com/product-detail/C5361945.html?s_z=n_ESPRESSIF%2520ESP32-WROOM-32E
 
+# Microphone
+The hole is on the bottom! Mount it underneath!
+
+|           | Freq Response<br> | Current Consumption | Voltage          | Low Power Mode        | Interface | Size                      | Mic Position |
+| --------- | ----------------- | ------------------- | ---------------- | --------------------- | --------- | ------------------------- | ------------ |
+| INMP444   | 60 - 15kHz        | 2.5mA at 3.3V       | 3.3V max 3.6V    | Standby 0.8 mA        | I2S       | 4.72 x 3.76 x 1 mm        | Bottom       |
+| ICS-43434 | 60 Hz - 20kHz     | 550 uA at 1.8V      | 3.3V<br>MAX 3.6V | Yes<br>300 uA at 1.8V | I2S       | 3.50 mm x 2.65mm x 0.98mm | Bottom       |
+How does bottom positioning work? Should it be placed underneath the PCB so the mic hole faces the user?
+* I believe so, I will test with my module when it arrives. Looks like it is mounted underneath
+
 # Total Purchases so Far
 
 $60 - initial Aliexpress order
