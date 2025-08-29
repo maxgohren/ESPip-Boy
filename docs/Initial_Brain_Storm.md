@@ -1,8 +1,12 @@
 # Inspiration
-https://github.com/Bellafaire/ESP32-Smart-Watch
-[Making DIY Smart Watch with ESP32 - Designing Smart Watch Faces](https://circuitdigest.com/microcontroller-projects/designing-smartwatch-using-esp32)
-[ZSWatch]([https://github.com/ZSWatch/ZSWatch?tab=readme-ov-file#hardware)
-[mike-rankin/ESP32-S3_1.69inch_Cap_Touch](https://github.com/mike-rankin/ESP32-S3_1.69inch_Cap_Touch)
+Here are some of the watches I've found on the internet that inspired me to build mine, or are currently influencing and helping the design due to their open source nature.
+* Circuit Digest Smart Watch (The Original In[Making DIY Smart Watch with ESP32 - Designing Smart Watch Faces](https://circuitdigest.com/microcontroller-projects/designing-smartwatch-using-esp32)
+* Bellafaire's ESP32 Smart Watch [Github](https://github.com/Bellafaire/ESP32-Smart-Watch)
+* [ZSWatch]([https://github.com/ZSWatch/ZSWatch?tab=readme-ov-file#hardware)
+*  [mike-rankin/ESP32-S3_1.69inch_Cap_Touch](https://github.com/mike-rankin/ESP32-S3_1.69inch_Cap_Touch)
+#### 3D Printed Case
+* Rough paint edges for a worn look!!! Super Sick! [Youtube](https://www.youtube.com/watch?v=l75A9TUMXOs&ab_channel=abe%27sprojects)
+* Form Factor: DM99 Rectangular face smart watch
 # Research Questions
 ## Straight up JARVIS Voice Control
 1. 🟨Text-to-speech synthesizer? 
@@ -12,24 +16,21 @@ https://github.com/Bellafaire/ESP32-Smart-Watch
 3. ✅ Microphone onboard
 	* definitely doable
 1. ✅ Speaker on board
-
 ## PCB Design and Assembly
 1. What tools do I need?
 		* Soldering Iron, solder
 		* Hot plate for SMD, solder paste
-1. What is a cost effective way to get electronic components, and how would it influence my design? 
+2. What is a cost effective way to get electronic components, and how would it influence my design? 
 	1. For example, can I use the same kinds of filtering capacitors all over my board or do different components have different requirements?
 			* Yes you can
-1. What are some absolute basic design principles to follow for a successful PCB? Test pads? Etc.
+3. What are some absolute basic design principles to follow for a successful PCB? Test pads? Etc.
 	* Test Pads
 	* Trace width calculations adequate for expected current
 	* Big Ground Plane
 	* Via minimization
 	* Good silkscreen with clear names and organization of parts (don't put on vias!)
 	* Design Rules Checker
-1. What are some advanced design features to ensure a successful PCB?
-
-
+4. What are some advanced design features to ensure a successful PCB?
 # Design Goals
 * Wearable smart watch
 * LED Flashlight
@@ -40,8 +41,6 @@ https://github.com/Bellafaire/ESP32-Smart-Watch
 	* High speed traces and interference
 		* SD Card reading
 		* USB input
-
-
 # Build Guide
 [Circuit Digest](https://circuitdigest.com/microcontroller-projects/diy-smartwatch-using-esp32-part3-interfacing-magnetometer-and-gyroscope-with-esp32)
 # Hardware
@@ -96,20 +95,10 @@ Could also do MLC for MPU6050 in python library.
 Change display brightness based on ambient light
 #### MAX30102 Heart Rate / Blood Oxygen Sensor
 
-#### 3D Printed Case
-Design Inspo -> rough paint edges for a worn look!!! Super Sick! 
-https://www.youtube.com/watch?v=l75A9TUMXOs&ab_channel=abe%27sprojects
-
-Form Factor inspo DM99 Rectangular face smart watch
-Maybe offset the strap?
-![[Pasted image 20250714144210.png]]
-
-
 # Software
 ## OS
 * FreeRTOS
 * NuttX
-
 ### Applications
 * Local music player over bluetooth
 * GPS app with user-uploadable maps via USB

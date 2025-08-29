@@ -1,16 +1,15 @@
-
 # When finished assembly
 * Check for shorts on all SMT components
 * Check for shorts between chips and power rails
 # Before Ordering
 * No DRC errors of course
 * Manully check each component and circuit on the board to make sure it was wired correctly
-* 
-# USB Impedance
+# USB
 USB 2.0 spec defines a differential characteristic impedance of 90 ohms, +/- 15%.
 [Controlled Impedance PCB Layer Stackup- JLCPCB](https://jlcpcb.com/impedance)
 https://jlcpcb.com/pcb-impedance-calculator
-
+https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-usb-bridge/user_guide.html#hardware-reference
+https://dubiouscreations.com/2021/04/06/designing-with-usb-c-lessons-learned/
 # Standard 
 Changing all signal tracks to 6 mil for 60 Ohms, increasing space between tracks as well.
 All power tracks not in polygons are 21 mil

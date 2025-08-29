@@ -1,3 +1,24 @@
+# August 28 2025 - Thursday 11:59 PM
+USB reading and implementing the schematic. Found some nice resources like the
+[ESP
+devboards](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-usb-bridge/user_guide.html#hardware-reference)
+and some engineering blogs @ [matthew
+lai](https://github.com/matthewlai/hex0ad). 
+
+Tested out my vibration motor, super easy, just analog write the pin. The motor
+board comes with a driver transistor which is great because it draws up to 90 mA
+and ESP32 pin is max 40 mA. 
+
+Got my LiPo charging working with a LiPo I had laying around, but the onboard
+esp32 regulator needs like a 1.5 V overhead, when I throw my 4.1 V lipo on, the
+regulator only gets 3.0 ~ 3.1 V output. It would probably work with that but I
+won't bother. I'll have my new regulators soon, with a much lower ceiling. 
+
+Working on the microphone now, but will probably give it a rest, I soldered the
+pins on upside down so now I can't see the silkscreen haha. 
+
+Goodnight!
+
 # August 27 2025 - Wednesday 06:12 PM
 A light day today, just some reading and part selection for UFL antennas and
 learning that MH1 (NOT MH4) is compatible with UFL. I like the ESP32-WROOM-32UE
