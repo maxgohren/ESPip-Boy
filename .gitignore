@@ -8,3 +8,5 @@
 
 
 docs/.obsidian/
+datasheets/*
+test_modules/esp32_sdcard_audio

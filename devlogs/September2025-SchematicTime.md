@@ -1,3 +1,75 @@
+# September  9 2025 - Tuesday 09:50 AM
+Waiting for hardware. Stuck on power supply choices. Simple discrete components
+linked together or a powerful PMIC with everything but the kitchen sink? I do
+not like making schematics for components I don't have a working reference
+design for right in front of me. I check JLC PCBA costs, and right out of the
+gate my design, without any cost optimizations, will be $200 for two boards.
+Pretty crazy.
+
+I would then not like to experiment with new components I am not comfortable
+with as this price drastically reduces the amount of hardware revisions I would
+like to do. Instead, if I would like to use the cheap but ubiquitous AXP2101
+with multiple bucks and LDOs, along with an integrated LiPo charger and fuel
+gauge, I will order it on AliExpress along with a breakout board. This will
+satisfy my need to have a working demo before I try to make a schematic
+including it. 
+
+It will be a parallel development/prototype with both a discrete setup (MAX17048
+		Fuel Gauge + TP63020 buck-boost 3.3V supply + TP4056/DW01
+		charger/protection) and an  integrated PMIC solution - AXP2101. Having a
+working prototype will allow me to learn about the devices and have real world
+measurements on how they perform in best and worst case battery life scenarios. 
+
+No more endless document reading, get your hands dirty and see what works!
+
+While waiting for the aformentioned hardware, I am working on LVGL integration.
+It is the best solution for my graphic needs and looks amazing. I got the hello
+world demo today, but man the examples/demo work is so annoying, they have this
+requirement you copy the examples or demo folders into the src/ folder but it
+always throws an error. It can't find the actual src, which according to the
+include directives is in the place it would be if I never copied the demo folder
+in the first place! So confusing, I will try again later!
+
+# September  6 2025 - Saturday 12:36 AM
+Today on my schematic, I wired up the display, the microphone and some roughed-in enable pins for
+my various high power peripherals like my vibration motor, buzzer and speaker. I
+did this so that I can see how many pins I have available and if my design is
+going to all fit on the ESP32's GPIO selection. So far I think it will be okay,
+and it will be helped if I can select a great PMIC with some I2C
+selectable outputs. This would allow me to have more I2C control instead
+of GPIO control which I am lacking. I really don't need the power of a
+GPIO anyways for simple enable pins, but for stuff like vibration motors
+or buzzers I do need a PWM output. All part of the balancing act haha.
+
+I've asked ChatGPT a bunch of times for my perfect PMIC and it keeps
+landing on the same modules, the MAX77658 and the TI BQ25190. Both are
+great chips and both do what I need. I haven't yet narrowed it down, but I
+would like to as it will influence the GPIO bottleneck and overall design.
+
+I'm aiming at the following power path:
+3.7V lipo -> buck boost @ 3.5V -> LDO @ 3.3V.
+I'm weary of these PMICs and using the buck boost output to directly power my
+ESP32 as the LDOs are more for the audio/RF paths, but I need the power spike
+handling ability. I will read more about ripple and how the ESP32 handles it.
+
+I'm really happy to have done more experimenting with the power supply and
+found why I need what I need. Running the battery straight into the 3.3V
+actually works and doesn't fry anything. This of course means my
+aliexpress LDO is not rated high enough for the BT/WiFi spike. I would
+like to try some bigger caps across the output to see if that helps. I've
+got a big 220uF right here, but it's late.
+
+I've made another order of parts like a buck-boost convertor, touch screen
+and breadboard. I've also got a cart full of audio supplies like a MAX
+mono amp and a small selection of tiny speakers. When these components
+come in, I will (for the 15th time) be done prototyping haha. Well, I just
+want it all working on a single board with all the devices connected so
+that there are no suprises when the PCB comes in. I don't want to find out
+theres another 500mA current spike somewhere and not have the hardware to
+deal with it. 
+
+LETSSS GOOOO!!!
+
 # September  3 2025 - Wednesday  6:39 PM
 It's been non-stop schematic time. Pouring over datasheets and reading
 requirements to find the perfect components. I have almost finished this quest.
