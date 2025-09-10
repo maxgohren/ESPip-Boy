@@ -1,3 +1,18 @@
+# September 10 2025 - Wednesday 01:06 AM
+Man LVGL is not simple to use. Manual install of folders to different locations
+in the library. Copy the config to the libraries folder. Compile and get the
+hello world running ok? Now try the demos, that in order to get it to just
+barely work (it doesn't seem to respond to my choice of demo from the
+		aformentioned config file) I need to manually massage a relative include
+path of a header. WTF?
+
+The one thing keeping me going right now is this demo of a smartwatch
+[UI](https://lvgl.io/demos). It looks so amazing, I really hope I can get this
+stable and working!
+
+Time for bed now though, I am happy I got my demo working when this morning I
+could only get the Hello World working.
+
 # September  9 2025 - Tuesday 09:50 AM
 Waiting for hardware. Stuck on power supply choices. Simple discrete components
 linked together or a powerful PMIC with everything but the kitchen sink? I do
