@@ -1,3 +1,29 @@
+# September 10 2025 - Wednesday 11:47 PM
+OMG LVGL is kind of a nightmare. 
+
+I have been at it all day. Installing my touchscreen display, trying out more
+examples and demos, finally comfortably using a slider widget, trying Arduino
+IDE in WSL to improve horrendous build times, it's been the worst integration
+into this project so far. 
+
+The last headache (I hope it's the last) has been the touchscreen functionality
+with TFT_eSPI and LVGL. I've found many threads complaing about how the
+touchscreen seems to rotate completely opposite the display so it never lines up
+correctly.
+
+https://forum.lvgl.io/t/screen-rotation/19316/12
+https://github.com/lvgl/lvgl/issues/7841
+https://forum.lvgl.io/t/inconsistency-between-display-rotation-and-touchscreen-coordinate-rotation/20242
+
+I've been trying solutions posted and playing with swapping coordinates around
+but no success. I don't really understand what's happening under the hood, who
+rotates what where, and how many times and which direction things are getting
+rotated. I need to do some more experiments to see which rotations from which
+libraries are required when. 
+
+Thankfully I only need one orientation, I hope that may make this easier. But
+man has this been a difficult ride.
+
 # September 10 2025 - Wednesday 01:06 AM
 Man LVGL is not simple to use. Manual install of folders to different locations
 in the library. Copy the config to the libraries folder. Compile and get the
