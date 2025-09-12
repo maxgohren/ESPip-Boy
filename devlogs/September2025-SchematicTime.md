@@ -1,3 +1,30 @@
+# September 11 2025 - Thursday 10:33 PM
+Today I am taking a break from display software, to work on display hardware!
+
+I got my new touchscreen TFT IPS display in, the same 1.69" I was using before
+but not touchscreen. I am traumatized from my day spent with my resistive touch
+2.4" and LVGL. 
+
+I also got some new jumpers, breadboard and buck-boost power supply convertors
+so my I actually ripped my whole breadboard clean and will rebuild it bigger,
+better, faster, stronger in the coming days. My design is more finalized so
+I figured it is time to clean it up to help in debugging and schematic design. 
+
+I spent tonight tinkering with the new display and reading about backlight LED
+current limiting resistors as I don't want to burn my only one out. If I do,
+it's ok but I'd rather not wait another 2 weeks and another $12 for another
+one. Looks like the reference schematics, my own model and some reading point
+to resistors in the ~1-100 Ohm range, as the backlight drops 3.2V. For a 3.3V
+supply, this leaves 0.1 V for the resistor. Limit it to 60 mA, gives you
+a solid 1.7 Ohms, or a more conservative 40 mA for 2.5 Ohms. I'll use 10 and go
+from there. 
+
+Gonna take a break now. I have a habit of pouring so much time into this
+project that it becomes stressful, with poor focus and fatigue being the
+driving factors. I want more quality, less quantity. Looking forward to the new
+display and the cleaner breadboard setup. Hopefully that inspires LVGL and my
+touchscreen to work flawlessly together!
+
 # September 10 2025 - Wednesday 11:47 PM
 OMG LVGL is kind of a nightmare. 
 
