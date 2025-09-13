@@ -1,3 +1,29 @@
+# September 13 2025 - Saturday 11:44 AM
+"It just works". It actually just works! LVGL with Arduino GFX + TouchLib
+works! I still had to do the quirky include path editing and moving the demo
+folder to make a demo work, but it works! No crazy colour bugs, no rotation
+issues, no mismatch betwen coord systems between display and touch, it just
+works!
+
+I do have crashing on the button matrix, but a more complicated button matrix
+with a scrolling view area works haha. I am very happy. The display is very
+responsive and the LVGL grapics work just like they look on the examples. 
+
+OMG the music player demo is sooo sick. The animations are actually pretty
+smooth and the layout is perfect (aside from touchscreen bounds not being
+dialed in, I can't exit a menu because the touchscreen bounds are smaller than
+the drawn button bounds). 
+
+Really satisfied with today's work and graphics setup. Really all there is to
+do now, is implement a simple menu with one of the various widgets (and
+hopefully one that doesn't crash) and then implement simple test apps for heart
+rate, clock, etc. 
+
+Then, when that is done, some sleep and interrupt handling on touch and motion. 
+
+And then when our proof of concept is finished, were good to finalize the
+design and properly finish the schematic, knowing the design works :).
+
 # September 13 2025 - Saturday 12:54 AM
 The new breadboard is off to an amazing start. All 6! i2C sensors enabled and
 detected on i2c scan. Capacitive touch sensor working perfectly and very
