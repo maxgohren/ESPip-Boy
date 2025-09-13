@@ -18,7 +18,7 @@ Here's to almost finishing a very clean prototype! Only a few more components
 are in the mail, and then it's time to call it done, and start serious design
 work on the PCB!
 
-![It was cleaner before the display](img_vid/fresh_breadboarded_display.png)
+![It was cleaner before the display](../img_vid/fresh_breadboarded_display.png)
 
 # September 11 2025 - Thursday 10:33 PM
 Today I am taking a break from display software, to work on display hardware!
