@@ -1,3 +1,25 @@
+# September 13 2025 - Saturday 12:54 AM
+The new breadboard is off to an amazing start. All 6! i2C sensors enabled and
+detected on i2c scan. Capacitive touch sensor working perfectly and very
+responsively. Display working perfectly on test sketch. 
+
+I am so happy it works. 20 pins later haha. I was scared to death too, because
+I accidentally wired it up the wrong way after spending so long learning about
+current limiting resistors and checking a million schematics to make sure
+I wouldn't blow my backlight. Turns out I could smell how hot my touch
+controller was, because I thought I was wiring up the display, but I was
+actually wiring up the touch controller as my FPC breakout was flipped around.
+
+I was using the silkscreen markings for the bottom side, not the side I was
+actually connected to, on the 2 layer breakout board!
+
+Even though my touch controller got super hot, I'm super happy it still works.
+Here's to almost finishing a very clean prototype! Only a few more components
+are in the mail, and then it's time to call it done, and start serious design
+work on the PCB!
+
+![It was cleaner before the display](img_vid/fresh_breadboarded_display.png)
+
 # September 11 2025 - Thursday 10:33 PM
 Today I am taking a break from display software, to work on display hardware!
 
