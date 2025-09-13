@@ -24,6 +24,8 @@ Then, when that is done, some sleep and interrupt handling on touch and motion.
 And then when our proof of concept is finished, were good to finalize the
 design and properly finish the schematic, knowing the design works :).
 
+<video controls src="../img_vid/music_player_demo.mov" width="600"></video>
+
 # September 13 2025 - Saturday 12:54 AM
 The new breadboard is off to an amazing start. All 6! i2C sensors enabled and
 detected on i2c scan. Capacitive touch sensor working perfectly and very
