@@ -1,3 +1,18 @@
+# September 18 2025 - Thursday 12:16 AM
+Got my audio equipment in today! A MAX98357 audio dac + amplifier combo (the IC
+is so tiny haha) and a couple speakers, one I am currently trying is only 16
+x 9 mm! And is quite loud!
+
+I hooked it up and got some Gavin Adcock playing right away! It is very easy to
+use, and I owe a huge thanks to [pschatzmann](https://github.com/pschatzmann),
+his Arduino libraries are TOP NOTCH!
+
+I do have a problem though, the audio is full of pops and crackle. I tried some
+online troubleshooting which included adding some filtering caps at the power
+supply, trying different power supplies, and changing the gain level, but
+nothing seems to help. I am happy anyways to now have a working audio
+interface, albeit a noisy one :).
+
 # September 13 2025 - Saturday 11:44 AM
 "It just works". It actually just works! LVGL with Arduino GFX + TouchLib
 works! I still had to do the quirky include path editing and moving the demo
