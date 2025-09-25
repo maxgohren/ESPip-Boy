@@ -1,3 +1,17 @@
+# September 24 2025 - Wednesday 10:43 PM
+Got the speaker and the microphone working seperately again.
+
+Speaker crackling issue? Was just the volume set too high! I turned it down the
+audio was crystal clear at lower volumes, no crackling at all. Will have to
+dial this in before production as gain is controlled through pulling the gain
+pin high or low. 
+
+The microphone is working again but confusing me. Using 
+[atomic14's mic test](https://github.com/atomic14/esp32-i2s-mic-test/blob/main/README.md) I can only get the mic working when I use only the RIGHT channel of audio, even though I have the L/R pin pulled low. This confuses me as the [INMP441 datasheet](http://invensense.tdk.com/wp-content/uploads/2015/02/INMP441.pdf) says it only ooutputs to the right channel when the L/R pin is pulled low. Bizarre!
+
+Now I am working on recording a sound clip to test the audio quality of the
+microphone :).
+
 # September 18 2025 - Thursday 12:16 AM
 Got my audio equipment in today! A MAX98357 audio dac + amplifier combo (the IC
 is so tiny haha) and a couple speakers, one I am currently trying is only 16
