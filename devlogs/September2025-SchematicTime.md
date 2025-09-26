@@ -1,3 +1,30 @@
+# September 25 2025 - Thursday  9:31 PM
+Too many I2C devices!
+
+0x15 -> CST816S Touchscreen Controller
+0x19 -> LSM303 Accelerometer
+0x1E -> HMC5883 Magnetometer
+0x23 -> BH1750 Light Sensor
+
+0x57 -> MAX30102 Heart Rate / Blood Oxygen Sensor
+0x68 -> MPU6050 
+
+0x57 -> DS3231 EEPROM Chip (AT24C32)
+0x68 -> DS3231 RTC
+
+Finally got the fake MAX17043 battery fuel gauge working, but it's terribly
+wrong. Needed to ground the QST pin to get it recognized on the I2C bus, and
+then got a reading of 12% when the battery had a voltage of ~3.7V haha. It's
+easy enough to design around that I'm not concerned about not having it
+working. 
+
+I'm very excited, most of my prototyping is finished, and there are no more
+parts I want to add. I've tested the USB input and charging the battery while
+powering the load with the charger (I still may use the battery disconnect
+circuit, it's only 2 components), and the microphone is working but I haven't
+actually listened to the output yet. 
+
+Almost done the breadboard prototype!
 # September 24 2025 - Wednesday 10:43 PM
 Got the speaker and the microphone working seperately again.
 
