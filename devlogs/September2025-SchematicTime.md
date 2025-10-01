@@ -1,3 +1,30 @@
+# September 30 2025 - Tuesday 11:41 PM
+Audio recording works!
+
+I've tried a handful of times on seperate occasions to record my microphone
+output to a WAV file and write it to the SD Card. I've tried github examples,
+built in examples and nothing has worked so far. I gave up on trying other
+people's code, so I just got ChatGPT to write me the simplest example to do it.
+
+Surprise surprise, it works great! And the code is so easy to understand,
+organized in only one file so debugging is super easy. Other's used elaborate
+wrappers on SD card libraries, made me use PlatformIO in VSCode, but never
+actually got me a working product.
+
+It is bittersweet though, it makes me feel as if I couldn't have done it
+without ChatGPT. The truth is I can though, I would have ended up with
+a similar solution anyways:
+I would have taken the SD card library that has worked for me, and taken
+Atomic14's I2S microphone example (which outputs just to the serial plotter), 
+and combine them so that I have working mic + SD card. It is true I didn't do
+this, and I haven't truly learned the I2S interface as well as I would like.
+
+However, I can still, and I will, write my own implementation to at least
+understand the calling of the different I2S functions, decrementing sample
+counts and so on and so forth. 
+
+Another development goal complete!
+
 # September 25 2025 - Thursday  9:31 PM
 Too many I2C devices!
 
