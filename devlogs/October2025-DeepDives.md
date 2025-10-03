@@ -1,3 +1,20 @@
+# October  2 2025 - Thursday 11:44 PM
+I spent the night tonight writing a WAV File decoder. I read the [1991
+specification](https://www.aelius.com/njh/wavemetatools/doc/riffmci.pdf) by IBM and Microsoft, and got confused so I consulted the wikipedia page which helped a lot in describing the actual byte counts of the fields in the header (I got stuck on the omitted chunkSizes in the weird description format used in the official spec.). 
+
+I was able to successfully decode ALL BUT the data size of my recording from my
+ESPip-Boy microphone. I am still not sure why the data size is returned as
+a zero. My code is dead simple, but alas, the bug is invisible to me.
+
+I am super proud of myself for allowing my curiosity to take me to the real
+documents that outline this technology. I am very happy to not need to rely on
+generative AI to solve these problems for me, when the information to solve the
+problem yourself is so readily available. 
+
+I can't describe the joy of writing a simple C program to load a WAV file and
+print the first four bytes and seeing the 'RIFF' pop up in the console. It
+feels like my first "Hello World" all over again!
+
 # October  1 2025 - Wednesday  9:37 PM
 It's the first of October! Today is the day that I've learned an important part
 of embedded software engineering (and really all software engineering). Domain
