@@ -1,3 +1,19 @@
+# October  8 2025 - Wednesday 12:13 AM
+Today I finished the TI Fuel Gauge and the LDO Regulator on the schematic.
+
+The TI fuel gauge is a little confusing with respects to the SRX pin. The
+datasheet says to connect this to VSYS, the system power rail. But then says it cannot exceed VBAT + 0.3. Then on online forums they say connect it to the *input* of the LDO, not the output, which I would think is the system power rail. So I am connecting it to the battery pin itself, not the system power rail. I hope it works!
+
+I am really enjoying working on the schematic seriously now, knowing that the
+prototype is almost finished. The only thing left to do on the prototype is
+verify the interrupt functionality of the MPU6050. Other than that, its truly
+schematic time. 
+
+I am on the fence about including the GPS, and will most likely remove it to
+save space on this design. I anticipate not using it nearly enough to justify
+it's cost and inclusion, but I will decide later as I encounter it on the
+schematic. I just think it's not necessary!
+
 # October  3 2025 - Friday 10:32 PM
 Schematic Work! 
 
