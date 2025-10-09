@@ -1,3 +1,26 @@
+# October  8 2025 - Wednesday  9:01 PM
+Deleted the GPS, wired up the TI fuel guage.
+
+Looks like I was confused, it uses a high side sense resistor. I (believe I)
+need to connect the BAT+ terminal to the BAT connection, and then connect the
+SRX (sense resistor pin) to the power supply input. This makes sense to me from
+my INA219 current sensor usage: it's just a series resistor the chip uses to
+make measurements. I must pass the current in and out of the battery through
+this resistor to make any meaningful readings. However, without the board on my
+bench, I do not trust my datasheet guesses. I added a 0R resistor on the SRX
+pin so that I may disconnect my battery from it, and wire it directly to the
+input of the LDO as originally planned. 
+
+I ran the design rules checker and cleaned up a few nets. It's almost too good
+to be true haha. It feels wrong to say but the schematic is done. I say wrong
+because I am not one to finish things and call it done, I like a neurotic and
+obsessive amount of checking things over, which I will do in the coming weeks.
+During the checking, I will also be placing and routing the components on the
+PCB, to start getting reps in there, and seeing what fits where and what
+doesn't work.
+
+My brain is fried, and I am done for the day. Hoorah!
+
 # October  8 2025 - Wednesday 12:13 AM
 Today I finished the TI Fuel Gauge and the LDO Regulator on the schematic.
 
