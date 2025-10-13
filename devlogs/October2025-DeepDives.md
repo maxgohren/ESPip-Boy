@@ -12,6 +12,14 @@ ohm.
 
 Simulated on falstad and it works well!
 
+I have also added a 10 ohm current limiting resistor, which dumps around 150mW
+of heat from 100mA. A nice 0805 or 1206 size can dissipate around 200-400W
+[Vishay SMD Resistor Datasheet](https://www.vishay.com/docs/28705/mcx0x0xpro.pdf), so it won't explode,
+but it is not the most efficient, especially in my battery operated device.
+I am OK with this though, as I am running this in my LCD Backlight LED driver as well.
+A more costly alternative is a constant current driver like a regulator, but
+I want to save some money on my PCBA by reducing component count where I can.
+
 # October  8 2025 - Wednesday  9:01 PM
 Deleted the GPS, wired up the TI fuel guage.
 
