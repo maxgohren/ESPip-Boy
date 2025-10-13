@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo "Syncing local obsidian files to ESPip-Boy Repo for version control"
+rsync /mnt/c/Users/Creeper\ Gang/Documents/Obsidian/Local/*.md .
+
+

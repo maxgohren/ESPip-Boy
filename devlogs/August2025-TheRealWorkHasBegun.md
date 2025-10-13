@@ -1,4 +1,39 @@
+# August 28 2025 - Thursday 11:59 PM
+USB reading and implementing the schematic. Found some nice resources like the
+[ESP
+devboards](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-usb-bridge/user_guide.html#hardware-reference)
+and some engineering blogs @ [matthew
+lai](https://github.com/matthewlai/hex0ad). 
 
+Tested out my vibration motor, super easy, just analog write the pin. The motor
+board comes with a driver transistor which is great because it draws up to 90 mA
+and ESP32 pin is max 40 mA. 
+
+Got my LiPo charging working with a LiPo I had laying around, but the onboard
+esp32 regulator needs like a 1.5 V overhead, when I throw my 4.1 V lipo on, the
+regulator only gets 3.0 ~ 3.1 V output. It would probably work with that but I
+won't bother. I'll have my new regulators soon, with a much lower ceiling. 
+
+Working on the microphone now, but will probably give it a rest, I soldered the
+pins on upside down so now I can't see the silkscreen haha. 
+
+Goodnight!
+
+# August 27 2025 - Wednesday 06:12 PM
+A light day today, just some reading and part selection for UFL antennas and
+learning that MH1 (NOT MH4) is compatible with UFL. I like the ESP32-WROOM-32UE
+with the UFL antenna, it will make my case smaller, because I won't need the PCB
+antenna sticking out over the side of the board. I can instead poke it through
+the case and then wrap it around and adhere it to the case! This should result
+in better signal as the UFL antenna's have better signal. The only problem is
+they expect 5mm of keepout area behind the case (on the inside) which is kinda
+goofy. I'll have to see if that is necessary or I can just avoid it. If I can't,
+I may just use the 5mm of PCB antenna then on the inside.
+
+I also did some reading and found some resources about USBC. I would like to
+have it on my board but there are obviously some more complicated design
+considerations, but I believe it is only adding a pull-down resistor to a CC
+line (what is a CC line?) and connecting the pairs of D+/D- lines together.
 
 # August 27 2025 - Wednesday 12:48 AM
 A nice night working on A2DP connectivity with the SD card. Works OK-ish. I can
@@ -102,7 +137,6 @@ reinstall my EC11 and make a menu on the TFT display for the user to select an
 app: clock, heart rate display, compass ( if I use the magnetometer chip -
 currently I have the MPU6050 installed. I want a 9 axis IMU haha ). Very
 exciting!
->>>>>>> 2ea2c7dbe329c0270c9c23a1b5f4df88c1e44207
 
 # August 16 2025 - Saturday 09:39 PM
 The EC11 schematic is complete! I have wired, tested, watch an episode of
