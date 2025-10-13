@@ -1,3 +1,17 @@
+# October 10 2025 - Monday 5:02 PM
+A Thanksgiving simulation for the Flashlight driver:
+
+For a ballpark 100mA current running through an LED, I need a BJT switch to control
+the current.
+
+Using the NPN on falstad.com with an hFE of 30 (like the 2N3903).
+This means I need an Ib of Ic / hFE => 100mA / 30 = 3.33 mA. Perfectly doable
+on my ESP32 GPIO pin. In order to get this from the 3.3V pin output, I need
+a current limiting resistor of Rb = (Vin - VRb) / Ib = (3.3V - 1V) / 10mA = 230
+ohm.
+
+Simulated on falstad and it works well!
+
 # October  8 2025 - Wednesday  9:01 PM
 Deleted the GPS, wired up the TI fuel guage.
 
