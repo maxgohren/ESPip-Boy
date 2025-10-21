@@ -1,3 +1,13 @@
+# October 21 2025 - Tuesday  9:16 AM
+Got the flashlight circuit working today! It is the last thing on my schematic
+that I haven't breadboarded! It's basically a copied and pasted driver from the
+LCD backlight circuit. I have a second transistor so I will probably try
+running that as well.
+
+The only problem I have is that the LED does not turn off fully at 0% duty
+cycle and I am not sure why. I tried digital writing low and detaching the PWM
+circuit but no luck. Maybe it is something with my circuit then.
+
 # October 10 2025 - Monday 5:02 PM
 A Thanksgiving simulation for the Flashlight driver:
 
