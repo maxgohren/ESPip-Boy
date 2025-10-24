@@ -1,3 +1,11 @@
+# October 17 2025 - Friday  8:59 AM
+Finished the last module! My flashlight driver! 
+
+I need to learn more about MOSFETs to understand the way they work and more
+importantly how they switch larger currents. BJTs make sense to me but I've
+forgotten everything I learned in school about MOSFETs. 
+
+Schematic just needs fine tuning now, no more additions!
 # October 10 2025 - Monday 5:02 PM
 A Thanksgiving simulation for the Flashlight driver:
 
