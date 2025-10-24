@@ -1,3 +1,35 @@
+=======
+# October 23 2025 - Thursday  1:38 PM
+Today is the official start of PCB day. A couple quick hardware validations on
+the bench to start off though:
+
+1) Do I need a pullup resistor on an input only pin for I2S? No, testing SD
+Input on D35 with my i2s_to_wave sketch. 
+2) Does an IMU interrupt work for waking up the ESP32 from deep sleep on pin
+33? Yes, it does and it works great!
+
+Time to start on the PCB, for realz this time!
+
+# October 22 2025 - Wednesday  8:52 AM
+Got the LED fully off! I rebuilt the circuit in the same way, but with
+a different MOSFET from my pack of 2 that I bought. The source leg of the first
+one broke off, so I am wondering if there was a fault there. I am also
+wondering if because the circuit was farther away that my ~6cm cable had enough
+capacitance to keep the gate on? I am not sure, but I am sure that it is
+working now! It was super weird, without connecting the cable to the ESP32,
+just holding it in my hand, the light would turn on shortly! Maybe I was
+discharging static electricity into the gate?
+
+# October 21 2025 - Tuesday  9:16 AM
+Got the flashlight circuit working today! It is the last thing on my schematic
+that I haven't breadboarded! It's basically a copied and pasted driver from the
+LCD backlight circuit. I have a second transistor so I will probably try
+running that as well.
+
+The only problem I have is that the LED does not turn off fully at 0% duty
+cycle and I am not sure why. I tried digital writing low and detaching the PWM
+circuit but no luck. Maybe it is something with my circuit then.
+
 # October 17 2025 - Friday  8:59 AM
 Finished the last module! My flashlight driver! 
 
@@ -6,6 +38,7 @@ importantly how they switch larger currents. BJTs make sense to me but I've
 forgotten everything I learned in school about MOSFETs. 
 
 Schematic just needs fine tuning now, no more additions!
+
 # October 10 2025 - Monday 5:02 PM
 A Thanksgiving simulation for the Flashlight driver:
 

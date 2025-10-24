@@ -1,9 +1,7 @@
 #include <lvgl.h>
 #include "Arduino_GFX_Library.h"
 #include "CST816S.h"
-#include <demos/lv_demos.h>
-
-
+//#include <demos/lv_demos.h>
 
 #define LCD_DC 2
 #define LCD_RST 4
@@ -142,7 +140,7 @@ void setup() {
   lv_indev_drv_register(&indev_drv);
 
   lv_obj_t *label = lv_label_create(lv_scr_act());
-  lv_label_set_text(label, "Hello Ardino and LVGL!");
+  lv_label_set_text(label, "Hello Arduino and LVGL!");
   lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
 
   const esp_timer_create_args_t lvgl_tick_timer_args = {
@@ -159,10 +157,10 @@ void setup() {
   esp_timer_create(&lvgl_tick_timer_args, &lvgl_tick_timer);
   esp_timer_start_periodic(lvgl_tick_timer, EXAMPLE_LVGL_TICK_PERIOD_MS * 1000);
 
-  lv_demo_widgets();
+  //lv_demo_widgets();
    //lv_demo_benchmark();
   // lv_demo_keypad_encoder();
-  // lv_demo_music();
+  //lv_demo_music();
   // lv_demo_stress();
 
   // lv_obj_t *img_obj = lv_img_create(lv_scr_act());
