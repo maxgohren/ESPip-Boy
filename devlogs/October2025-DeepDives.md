@@ -1,4 +1,12 @@
-=======
+# October 29 2025 - Wednesday  5:50 PM
+It's done already! Today I finished V1.0 of the ESPip-Boy PCB. I can't believe
+I'm writing this! I will add the schematic, PCB files and screenshots of the
+model when I am done checking every thing over 10 times, as well as making any
+final cleanup. That was surprisingly fast!
+
+I can't wait to do my last check ups and cleanups, as well as have some
+friends have a look at it, and then send it off to the PCBA house! 
+
 # October 23 2025 - Thursday  1:38 PM
 Today is the official start of PCB day. A couple quick hardware validations on
 the bench to start off though:
