@@ -5,6 +5,7 @@
 .vscode/ipch
 .docs/.obsidian
 .datasheets/*
+*.swp
 
 
 docs/.obsidian/
