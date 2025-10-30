@@ -10,14 +10,14 @@ A smart watch based on the ESP32
 * Sensors
   * Heart Rate & Blood Oxygen
   * Light Sensor (Auto Display Brightness)
-  * Accelerometer Magnetometer (Compass, Auto Wakeup, Gestures)
-  * GPS Module
+  * Accelerometer (Auto Wakeup, Gestures) 
+  * Magnetometer  (Compass)
 * Controlled with Push-Button Rotary Encoder
 
 # Planned Applications
 * Compass
 * Pedometer
-* Map with Current Position
+* Map/Photo Display
 * Clock
 * Heart Rate Monitor
 * Music Playback
