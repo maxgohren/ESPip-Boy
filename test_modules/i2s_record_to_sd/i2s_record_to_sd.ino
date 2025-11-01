@@ -5,8 +5,8 @@
 #include <driver/i2s.h>
 
 // I2S microphone pins
-#define I2S_WS 33
-#define I2S_SCK 32
+#define I2S_WS 27
+#define I2S_SCK 26
 #define I2S_SD 35
 
 // SD card SPI pins
