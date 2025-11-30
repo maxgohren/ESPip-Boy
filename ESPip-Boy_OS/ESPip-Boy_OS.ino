@@ -1,813 +1,473 @@
-#include "Wire.h"
-#include <Arduino.h>
-#include <ESP_Knob.h>
-#include <FS.h>
-#include <SD.h>
-#include <SPI.h>
-#include <TFT_eSPI.h>       // Hardware-specific library
-#include <JPEGDecoder.h>
+#include "CST816S.h"
+#include "SparkFun_BMI270_Arduino_Library.h"
+#include <Arduino_GFX_Library.h>
+#include "display.h"
+// ----- Pin Definitions -----
+#define GFX_BL 14
+#define LCD_DC     27
+#define LCD_RST    26
+#define LCD_CS     15
+#define LCD_SCK    18
+#define LCD_BL     14
+#define LCD_MOSI   23
 
-#include "AudioTools.h"
-#include "AudioTools/AudioLibs/A2DPStream.h"
-#include "AudioTools/AudioCodecs/CodecMP3Helix.h"
-//#include "AudioTools/AudioLibs/AudioBoardStream.h" // for SPI pins
+#define LCD_WIDTH  240
+#define LCD_HEIGHT 280
 
-File file;
-MP3DecoderHelix mp3;  // or change to MP3DecoderMAD
-EncodedAudioStream decoder(&file, &mp3);
-BluetoothA2DPSource a2dp_source;
+#define IIC_SDA    4
+#define IIC_SCL    16
 
-// callback used by A2DP to provide the sound data - usually len is 128 2 channel int16 frames
-int32_t get_sound_data(uint8_t* data, int32_t size) {
-  int32_t result = decoder.readBytes((uint8_t*)data, size);
-  delay(1); // feed the dog
-  return result;
+#define TP_RST     25
+#define TP_INT     33
+
+#define IMU_INT 2
+
+// ----- Display Setup -----
+Arduino_DataBus *bus = new Arduino_ESP32SPI(LCD_DC, LCD_CS, LCD_SCK, LCD_MOSI);
+Arduino_GFX *gfx = new Arduino_ST7789(
+  bus,
+  LCD_RST,          // RST pin
+  0,                // rotation (0–3)
+  true,             // IPS
+  LCD_WIDTH,
+  LCD_HEIGHT,
+  0, 20, 0, 0       // x, y offsets for 240x280 ST7789 panels
+);
+
+// ----- Touch Setup -----
+CST816S touch(IIC_SDA, IIC_SCL, TP_RST, TP_INT);
+
+// IMU Setup
+BMI270 imu;
+uint8_t i2cAddress = BMI2_I2C_PRIM_ADDR; // 0x68
+volatile bool imuInterruptOccurred = false;
+
+static int16_t w, h, center;
+static int16_t hHandLen, mHandLen, sHandLen, markLen;
+static float sdeg, mdeg, hdeg;
+static int16_t osx = 0, osy = 0, omx = 0, omy = 0, ohx = 0, ohy = 0; // Saved H, M, S x & y coords
+static int16_t nsx, nsy, nmx, nmy, nhx, nhy;                         // H, M, S x & y coords
+static int16_t xMin, yMin, xMax, yMax;                               // redraw range
+static int16_t hh, mm, ss;
+static unsigned long targetTime; // next action time
+
+static int16_t *cached_points;
+static uint16_t cached_points_idx = 0;
+static int16_t *last_cached_point;
+
+void imuInterruptHandler()
+{
+    imuInterruptOccurred = true;
 }
 
-
-#include "pitches.h"
-// notes in the melody:
-int melody[] = {
-  NOTE_E5, NOTE_E5, NOTE_E5,
-  NOTE_E5, NOTE_E5, NOTE_E5,
-  NOTE_E5, NOTE_G5, NOTE_C5, NOTE_D5,
-  NOTE_E5,
-  NOTE_F5, NOTE_F5, NOTE_F5, NOTE_F5,
-  NOTE_F5, NOTE_E5, NOTE_E5, NOTE_E5, NOTE_E5,
-  NOTE_E5, NOTE_D5, NOTE_D5, NOTE_E5,
-  NOTE_D5, NOTE_G5
-};
-// note durations: 4 = quarter note, 8 = eighth note, etc, also called tempo:
-int noteDurations[] = {
-  8, 8, 4,
-  8, 8, 4,
-  8, 8, 8, 8,
-  2,
-  8, 8, 8, 8,
-  8, 8, 8, 16, 16,
-  8, 8, 8, 8,
-  4, 4
-};
-
-#define SDA 13
-#define SCL 27
-#define GPIO_NUM_KNOB_PIN_A     35
-#define GPIO_NUM_KNOB_PIN_B     34
-#define GPIO_NUM_KNOB_SWITCH    32
-#define BLACK 0x0000
-#define WHITE 0xFFFF
-#define BUZZER_PIN 21
-
-const int MPU = 0x68; // I2C address of the MPU-6050
-int16_t AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
-int16_t h;
-int16_t w;
-int inc = -2;
-float xx, xy, xz;
-float yx, yy, yz;
-float zx, zy, zz;
-float fact;
-int Xan, Yan;
-int Xoff;
-int Yoff;
-int Zoff;
-struct Point3d
+void setup(void)
 {
-  int x;
-  int y;
-  int z;
-};
-struct Point2d
-{
-  int x;
-  int y;
-};
-int LinestoRender; // lines to render.
-int OldLinestoRender; // lines to render just in case it changes. this makes sure the old lines all get erased.
-struct Line3d
-{
-  Point3d p0;
-  Point3d p1;
-};
-struct Line2d
-{
-  Point2d p0;
-  Point2d p1;
-};
-Line3d Lines[20];
-Line2d Render[20];
-Line2d ORender[20];
-
-
-TFT_eSPI tft = TFT_eSPI();
-ESP_Knob *knob;
-int buttonState = HIGH;
-enum app {
-  CLOCK = 0,
-  CUBE,
-  BUZZER,
-  MENU,
-  APP_MAX
-};
-#define MAX_MENU APP_MAX
-int menuState = 0;
-int appState = MENU;
-
-
-void onKnobLeftEventCallback(int count, void *usr_data)
-{
-    if(appState == MENU){
-      if(count < 0 || menuState < 0)
-        menuState = 0;
-      else
-        menuState = count % MAX_MENU;
-    }
-    Serial.printf("Detect left event, count is %d, menuState %d\n", count, menuState);
-}
-
-void onKnobRightEventCallback(int count, void *usr_data)
-{
-    if(appState == MENU){
-      if(count >= MAX_MENU || menuState >= MAX_MENU)
-        menuState = MAX_MENU;
-      else
-        menuState = count % MAX_MENU; //need a way to control count, really hard to use this library
-    }
-    Serial.printf("Detect right event, count is %d menuState %d\n", count, menuState);
-}
-
-void onKnobHighLimitEventCallback(int count, void *usr_data)
-{
-    Serial.printf("Detect high limit event, count is %d menuState %d\n", count, menuState);
-}
-
-void onKnobLowLimitEventCallback(int count, void *usr_data)
-{
-    Serial.printf("Detect low limit event, count is %d menuState %d\n", count, menuState);
-}
-
-void onKnobZeroEventCallback(int count, void *usr_data)
-{
-    Serial.printf("Detect zero event, count is %d menuState %d\n", count, menuState);
-}
-
-void initKnob(){
-  knob = new ESP_Knob(GPIO_NUM_KNOB_PIN_A, GPIO_NUM_KNOB_PIN_B);
-  // knob->invertDirection();
-    knob->begin();
-    knob->attachLeftEventCallback(onKnobLeftEventCallback);
-    knob->attachRightEventCallback(onKnobRightEventCallback);
-    knob->attachHighLimitEventCallback(onKnobHighLimitEventCallback);
-    knob->attachLowLimitEventCallback(onKnobLowLimitEventCallback);
-    knob->attachZeroEventCallback(onKnobZeroEventCallback);
-
-    pinMode(GPIO_NUM_KNOB_SWITCH, INPUT_PULLUP);
-}
-
-void initSDCard(){
-   // Set all chip selects high to avoid bus contention during initialisation of each peripheral
-  digitalWrite(15, HIGH); // TFT screen chip select
-  digitalWrite( 5, HIGH); // SD card chips select, must use GPIO 5 (ESP32 SS)
-
-  if (!SD.begin(5, tft.getSPIinstance())) {
-    Serial.println("Card Mount Failed");
-    tft.println("Card Mount Failed");
-    return;
-  }
-  uint8 cardType = SD.cardType();
-
-  if (cardType == CARD_NONE) {
-    Serial.println("NO SD Card Attached");
-    tft.println("No SD Card Attached");
-    return;
-  }
-  Serial.print("SD Card Type: ");
-  if (cardType == CARD_MMC) {
-    Serial.println("MMC");
-  } else if (cardType == CARD_SD) {
-    Serial.println("SDSC");
-  } else if (cardType == CARD_SDHC) {
-    Serial.println("SDHC");
-  } else {
-    Serial.println("UNKNOWN");
-  }
-
-  uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-  Serial.printf("SD Card Size: %lluMB\n", cardSize);
-
-  Serial.println("initialisation done.");
-
-
-
-  //testSDCard();
-}
-
-void setup() {
   Serial.begin(115200);
-  Wire.begin(SDA, SCL);
-  initKnob();
+  Serial.println("Arduino_GFX Clock example");
+  Serial.println(__TIME__);
 
-  
-  tft.init();
-  tft.fillScreen(TFT_BLACK);
-  tft.setCursor(0, 20, 4);
-  tft.setTextColor(TFT_WHITE);
-  tft.printf(" Height: %d\n", tft.height());
-  tft.printf(" Width: %d\n", tft.width());
-  tft.setTextWrap( true, true );
-  delay(2000);
-
-  initSDCard();
-
-  // Music AFTER SD card because we need to init SD first
-  AudioToolsLogger.begin(Serial, AudioToolsLogLevel::Info);
-  file = SD.open("/gavin_adcock_loose_strings.mp3", FILE_READ);
-  if (!file) {
-    Serial.println("file failed");
-    stop();
-  }
-   // make sure we have enough space for the pcm data
-  decoder.transformationReader().resizeResultQueue(1024 * 8);
-  if (!decoder.begin()) {
-    Serial.println("decoder failed");
-    stop();
-  }
-  // start the bluetooth
-  Serial.println("starting A2DP...");
-  a2dp_source.set_data_callback(get_sound_data);
-  a2dp_source.start("H1");
-  //a2dp_source.start("Max’s AirPods");
-  //a2dp_source.start("esp32");
-  
-
-  tft.init();
-  tft.fillScreen(TFT_BLACK);
-
-  initCube();
-}
-
-void initCube(){
-  h = tft.height();
-  w = tft.width();
-  tft.setRotation(0);
-  tft.fillScreen(TFT_BLACK);
-  cube();
-  fact = 180 / 3.14159259; // conversion from degrees to radians.
-  Xoff = 120; // Position the centre of the 3d conversion space into the centre of the TFT screen.
-  Yoff = 140;
-  Zoff = 550; // Z offset in 3D space (smaller = closer and bigger rendering)
-  // Initialize MPU
-  Wire.beginTransmission(MPU);
-  Wire.write(0x6B);  // PWR_MGMT_1 register
-  Wire.write(0);     // set to zero (wakes up the MPU-6050)
-  Wire.endTransmission(true);
-}
-
-
-void loop() {
-  //i2c_scan();
-  check_rotary_knob_state();
-  updateApp();
- 
-}
-
-void updateApp(){
-  switch (appState){
-    default:
-    case MENU:
-      drawMenu();
-      break;
-    case CLOCK:
-      drawClock();
-      break;
-    case CUBE:
-     drawCube();
-     break;
-    case BUZZER:
-     drawBuzzer();
-     break;
-  }
-}
-
-void drawMenu(){
-  const int interval = 300; // redraw 3 times every second
-  static unsigned long previousMillis = 0;
-  unsigned long currentMillis = millis();
-
-  if (currentMillis - previousMillis >= interval){
-    previousMillis = currentMillis;
-
-    tft.fillScreen(TFT_BLACK);
-    tft.setCursor(0, 20, 4);
-    menuState == CLOCK ? tft.setTextColor(TFT_RED) :  tft.setTextColor(TFT_WHITE);
-    tft.println("CLOCK");
-    menuState == CUBE ? tft.setTextColor(TFT_RED) :  tft.setTextColor(TFT_WHITE);
-    tft.println("CUBE");
-    menuState == BUZZER ? tft.setTextColor(TFT_RED) :  tft.setTextColor(TFT_WHITE);
-    tft.println("BUZZER");
-  }
-}
-
-void drawBuzzer(){
-  // iterate over the notes of the melody:
-  int size = sizeof(noteDurations) / sizeof(int);
-
-  for (int thisNote = 0; thisNote < size; thisNote++) {
-
-    // to calculate the note duration, take one second divided by the note type.
-    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-    int noteDuration = 1000 / noteDurations[thisNote];
-    tone(BUZZER_PIN, melody[thisNote], noteDuration);
-
-    // to distinguish the notes, set a minimum time between them.
-    // the note's duration + 30% seems to work well:
-    int pauseBetweenNotes = noteDuration * 1.30;
-    delay(pauseBetweenNotes);
-    // stop the tone playing:
-    noTone(BUZZER_PIN);
-  }
-}
-
-void drawClock(){
-  const int interval = 300; // redraw 3 times every second
-  static unsigned long previousMillis = 0;
-  unsigned long currentMillis = millis();
-
-  if (currentMillis - previousMillis >= interval){
-    previousMillis = currentMillis;
-
-    tft.fillScreen(TFT_BLACK);
-    tft.fillCircle(tft.width() / 2, tft.height() / 2, 50, TFT_GREEN);
-  }
-}
-
-void drawCube(){
-  cubeLoop();
-}
-
-
-
-void check_rotary_knob_state(){
-  static int lastButtonState = HIGH;
-  buttonState = digitalRead(GPIO_NUM_KNOB_SWITCH);
-  if (buttonState != lastButtonState)
+  // Init Display
+  if (!gfx->begin())
   {
-    if (buttonState == LOW){
-      Serial.println("button down");
-    }
-    else
-    {
-      if (appState != MENU)
-        appState = MENU;
-      else
-        appState = menuState;
-      Serial.printf("button up, menuState: %d\n", menuState);
-
-    }
-    delay(50);
+    Serial.println("gfx->begin() failed!");
   }
-  lastButtonState = buttonState;
+  gfx->fillScreen(BACKGROUND);
+
+#ifdef GFX_BL
+  pinMode(GFX_BL, OUTPUT);
+  digitalWrite(GFX_BL, HIGH);
+#endif
+
+  // init LCD constant
+  w = gfx->width();
+  h = gfx->height();
+  if (w < h)
+  {
+    center = w / 2;
+  }
+  else
+  {
+    center = h / 2;
+  }
+  hHandLen = center * 3 / 8;
+  mHandLen = center * 2 / 3;
+  sHandLen = center * 5 / 6;
+  markLen = sHandLen / 6;
+  cached_points = (int16_t *)malloc((hHandLen + 1 + mHandLen + 1 + sHandLen + 1) * 2 * 2);
+
+  // Draw 60 clock marks
+  draw_round_clock_mark(
+      // draw_square_clock_mark(
+      center - markLen, center,
+      center - (markLen * 2 / 3), center,
+      center - (markLen / 2), center);
+
+  hh = conv2d(__TIME__);
+  mm = conv2d(__TIME__ + 3);
+  ss = conv2d(__TIME__ + 6);
+
+  targetTime = ((millis() / 1000) + 1) * 1000;
+
+  // Init IMU
+    while(imu.beginI2C(i2cAddress) != BMI2_OK)
+  {
+      Serial.println("Error: BMI270 not connected, check wiring and I2C address!");
+      delay(1000);
+  }
+  Serial.println("BMI270 connected!");
+  imu.enableFeature(BMI2_WRIST_WEAR_WAKE_UP);
+  imu.enableFeature(BMI2_WRIST_GESTURE);
+  imu.mapInterruptToPin(BMI2_WRIST_WEAR_WAKE_UP_INT, BMI2_INT1);
+  imu.mapInterruptToPin(BMI2_WRIST_GESTURE_INT, BMI2_INT1);
+
+  // IMU Interrupt Setup
+  bmi2_int_pin_config intPinConfig;
+  intPinConfig.pin_type = BMI2_INT1;
+  intPinConfig.int_latch = BMI2_INT_NON_LATCH;
+  intPinConfig.pin_cfg[0].lvl = BMI2_INT_ACTIVE_HIGH;
+  intPinConfig.pin_cfg[0].od = BMI2_INT_PUSH_PULL;
+  intPinConfig.pin_cfg[0].output_en = BMI2_INT_OUTPUT_ENABLE;
+  intPinConfig.pin_cfg[0].input_en = BMI2_INT_INPUT_DISABLE;
+  imu.setInterruptPinConfig(intPinConfig);
+  attachInterrupt(digitalPinToInterrupt(IMU_INT), imuInterruptHandler, RISING);
+
+  Serial.println("ESPip-Boy init complete.");
 }
 
+void loop()
+{
+  // Wait for interrupt to occur
+  if(imuInterruptOccurred)
+  {
+      // Reset flag for next interrupt
+      interruptOccurred = false;
 
+      Serial.print("Interrupt occurred!");
+      Serial.print("\t");
 
-void i2c_scan(){
-  byte error, address;
-  int nDevices = 0;
-  const int interval = 5000; // scan every 5 seconds
-  static unsigned long previousMillis = 0;
+      // Get the interrupt status to know which condition triggered
+      uint16_t interruptStatus = 0;
+      imu.getInterruptStatus(&interruptStatus);
 
-  unsigned long currentMillis = millis();
-
-  if (currentMillis - previousMillis >= interval){
-    Serial.println("Scanning for I2C devices ...");
-    for(address = 0x01; address < 0x7f; address++){
-      Wire.beginTransmission(address);
-      error = Wire.endTransmission();
-      if (error == 0){
-        Serial.printf("I2C found @ addr: 0x%02X\n", address);
-        //tft.printf("I2C found @ addr: 0x%02X\n", address);
-        nDevices++;
-      } else if(error != 2){
-        Serial.printf("Error %d at address 0x%02X\n", error, address);
-      }
-    }
-    if (nDevices == 0){
-      Serial.println("No I2C devices found");
-    }
-    previousMillis = currentMillis;
-  }
-}
-
-
-
-void testSDCard(){
-  tft.setRotation(2);  // portrait
-  tft.fillScreen(random(0xFFFF));
-
-  // The image is 300 x 300 pixels so we do some sums to position image in the middle of the screen!
-  // Doing this by reading the image width and height from the jpeg info is left as an exercise!
-  int x = (tft.width()  - 300) / 2 - 1;
-  int y = (tft.height() - 300) / 2 - 1;
-
-  drawSdJpeg("/EagleEye.jpg", x, y);     // This draws a jpeg pulled off the SD Card
-  delay(2000);
-
-  tft.setRotation(2);  // portrait
-  tft.fillScreen(random(0xFFFF));
-  drawSdJpeg("/Baboon40.jpg", 0, 0);     // This draws a jpeg pulled off the SD Card
-  delay(2000);
-
-  tft.setRotation(2);  // portrait
-  tft.fillScreen(random(0xFFFF));
-  drawSdJpeg("/lena20k.jpg", 0, 0);     // This draws a jpeg pulled off the SD Card
-  delay(2000);
-
-  tft.setRotation(1);  // landscape
-  tft.fillScreen(random(0xFFFF));
-  drawSdJpeg("/Mouse480.jpg", 0, 0);     // This draws a jpeg pulled off the SD Card
-
-  delay(5000);
-}
-
-//####################################################################################################
-// Draw a JPEG on the TFT pulled from SD Card
-//####################################################################################################
-// xpos, ypos is top left corner of plotted image
-void drawSdJpeg(const char *filename, int xpos, int ypos) {
-
-  // Open the named file (the Jpeg decoder library will close it)
-  File jpegFile = SD.open( filename, FILE_READ);  // or, file handle reference for SD library
-
-  if ( !jpegFile ) {
-    Serial.print("ERROR: File \""); Serial.print(filename); Serial.println ("\" not found!");
-    return;
-  }
-
-  Serial.println("===========================");
-  Serial.print("Drawing file: "); Serial.println(filename);
-  Serial.println("===========================");
-
-  // Use one of the following methods to initialise the decoder:
-  bool decoded = JpegDec.decodeSdFile(jpegFile);  // Pass the SD file handle to the decoder,
-  //bool decoded = JpegDec.decodeSdFile(filename);  // or pass the filename (String or character array)
-
-  if (decoded) {
-    // print information about the image to the serial port
-    jpegInfo();
-    // render the image onto the screen at given coordinates
-    jpegRender(xpos, ypos);
-  }
-  else {
-    Serial.println("Jpeg file format not supported!");
-  }
-}
-
-//####################################################################################################
-// Draw a JPEG on the TFT, images will be cropped on the right/bottom sides if they do not fit
-//####################################################################################################
-// This function assumes xpos,ypos is a valid screen coordinate. For convenience images that do not
-// fit totally on the screen are cropped to the nearest MCU size and may leave right/bottom borders.
-void jpegRender(int xpos, int ypos) {
-
-  //jpegInfo(); // Print information from the JPEG file (could comment this line out)
-
-  uint16_t *pImg;
-  uint16_t mcu_w = JpegDec.MCUWidth;
-  uint16_t mcu_h = JpegDec.MCUHeight;
-  uint32_t max_x = JpegDec.width;
-  uint32_t max_y = JpegDec.height;
-
-  bool swapBytes = tft.getSwapBytes();
-  tft.setSwapBytes(true);
-
-  // Jpeg images are draw as a set of image block (tiles) called Minimum Coding Units (MCUs)
-  // Typically these MCUs are 16x16 pixel blocks
-  // Determine the width and height of the right and bottom edge image blocks
-  uint32_t min_w = jpg_min(mcu_w, max_x % mcu_w);
-  uint32_t min_h = jpg_min(mcu_h, max_y % mcu_h);
-
-  // save the current image block size
-  uint32_t win_w = mcu_w;
-  uint32_t win_h = mcu_h;
-
-  // record the current time so we can measure how long it takes to draw an image
-  uint32_t drawTime = millis();
-
-  // save the coordinate of the right and bottom edges to assist image cropping
-  // to the screen size
-  max_x += xpos;
-  max_y += ypos;
-
-  // Fetch data from the file, decode and display
-  while (JpegDec.read()) {    // While there is more data in the file
-    pImg = JpegDec.pImage ;   // Decode a MCU (Minimum Coding Unit, typically a 8x8 or 16x16 pixel block)
-
-    // Calculate coordinates of top left corner of current MCU
-    int mcu_x = JpegDec.MCUx * mcu_w + xpos;
-    int mcu_y = JpegDec.MCUy * mcu_h + ypos;
-
-    // check if the image block size needs to be changed for the right edge
-    if (mcu_x + mcu_w <= max_x) win_w = mcu_w;
-    else win_w = min_w;
-
-    // check if the image block size needs to be changed for the bottom edge
-    if (mcu_y + mcu_h <= max_y) win_h = mcu_h;
-    else win_h = min_h;
-
-    // copy pixels into a contiguous block
-    if (win_w != mcu_w)
-    {
-      uint16_t *cImg;
-      int p = 0;
-      cImg = pImg + win_w;
-      for (int h = 1; h < win_h; h++)
+      // Check if this is the correct interrupt condition
+      if(interruptStatus & BMI270_WRIST_WAKE_UP_STATUS_MASK)
       {
-        p += mcu_w;
-        for (int w = 0; w < win_w; w++)
+          Serial.print("Wake up!");
+
+          Serial.print("\t");
+      }
+      if(interruptStatus & BMI270_WRIST_GEST_STATUS_MASK)
+      {
+          Serial.print("Gesture: ");
+          
+          // Get the gesture
+          uint8_t gesture = 0;
+          imu.getWristGesture(&gesture);
+
+          // Print gesture
+          switch(gesture)
+          {
+              case BMI2_WRIST_GESTURE_ARM_DOWN:
+              {
+                  Serial.print("Arm down");
+                  break;
+              }
+              case BMI2_WRIST_GESTURE_ARM_UP:
+              {
+                  Serial.print("Arm up");
+                  break;
+              }
+              case BMI2_WRIST_GESTURE_SHAKE_JIGGLE:
+              {
+                  Serial.print("Shake jiggle");
+                  break;
+              }
+              case BMI2_WRIST_GESTURE_FLICK_IN:
+              {
+                  Serial.print("Flick in");
+                  break;
+              }
+              case BMI2_WRIST_GESTURE_FLICK_OUT:
+              {
+                  Serial.print("Flick out");
+                  break;
+              }
+              default:
+              {
+                  Serial.print("Unknown!");
+                  break;
+              }
+          }
+      }
+      if(!(interruptStatus & (BMI270_WRIST_WAKE_UP_STATUS_MASK | BMI270_WRIST_GEST_STATUS_MASK)))
+      {
+          Serial.print("Unknown interrupt condition!");
+      }
+      
+      Serial.println();
+  }
+
+
+  unsigned long cur_millis = millis();
+  if (cur_millis >= targetTime)
+  {
+    targetTime += 1000;
+    ss++; // Advance second
+    if (ss == 60)
+    {
+      ss = 0;
+      mm++; // Advance minute
+      if (mm > 59)
+      {
+        mm = 0;
+        hh++; // Advance hour
+        if (hh > 23)
         {
-          *cImg = *(pImg + w + p);
-          cImg++;
+          hh = 0;
         }
       }
     }
-
-    // calculate how many pixels must be drawn
-    uint32_t mcu_pixels = win_w * win_h;
-
-    // draw image MCU block only if it will fit on the screen
-    if (( mcu_x + win_w ) <= tft.width() && ( mcu_y + win_h ) <= tft.height())
-      tft.pushImage(mcu_x, mcu_y, win_w, win_h, pImg);
-    else if ( (mcu_y + win_h) >= tft.height())
-      JpegDec.abort(); // Image has run off bottom of screen so abort decoding
   }
 
-  tft.setSwapBytes(swapBytes);
-
-  showTime(millis() - drawTime); // These lines are for sketch testing only
-}
-
-//####################################################################################################
-// Print image information to the serial port (optional)
-//####################################################################################################
-// JpegDec.decodeFile(...) or JpegDec.decodeArray(...) must be called before this info is available!
-void jpegInfo() {
-
-  // Print information extracted from the JPEG file
-  Serial.println("JPEG image info");
-  Serial.println("===============");
-  Serial.print("Width      :");
-  Serial.println(JpegDec.width);
-  Serial.print("Height     :");
-  Serial.println(JpegDec.height);
-  Serial.print("Components :");
-  Serial.println(JpegDec.comps);
-  Serial.print("MCU / row  :");
-  Serial.println(JpegDec.MCUSPerRow);
-  Serial.print("MCU / col  :");
-  Serial.println(JpegDec.MCUSPerCol);
-  Serial.print("Scan type  :");
-  Serial.println(JpegDec.scanType);
-  Serial.print("MCU width  :");
-  Serial.println(JpegDec.MCUWidth);
-  Serial.print("MCU height :");
-  Serial.println(JpegDec.MCUHeight);
-  Serial.println("===============");
-  Serial.println("");
-}
-
-//####################################################################################################
-// Show the execution time (optional)
-//####################################################################################################
-// WARNING: for UNO/AVR legacy reasons printing text to the screen with the Mega might not work for
-// sketch sizes greater than ~70KBytes because 16-bit address pointers are used in some libraries.
-
-// The Due will work fine with the HX8357_Due library.
-
-void showTime(uint32_t msTime) {
-  //tft.setCursor(0, 0);
-  //tft.setTextFont(1);
-  //tft.setTextSize(2);
-  //tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  //tft.print(F(" JPEG drawn in "));
-  //tft.print(msTime);
-  //tft.println(F(" ms "));
-  Serial.print(F(" JPEG drawn in "));
-  Serial.print(msTime);
-  Serial.println(F(" ms "));
-}
-
-void cubeLoop(){
-  //For cube rotation
-  int xOut = 0;
-  int yOut = 0;
-  // Rotate around x and y axes in 1 degree increments
-  xOut = map(AcX, -17000, 17000, -50, 50);
-  yOut = map(AcY, -17000, 17000, -50, 50);
-  Xan = xOut;
-  Yan = yOut;
-  Yan = Yan % 360;
-  Xan = Xan % 360; // prevents overflow.
-  SetVars(); //sets up the global vars to do the 3D conversion.
-  Zoff = 240;
-    // Zoom in and out on Z axis within limits
-    // the cube intersects with the screen for values < 160
-    Zoff += inc;
-    if (Zoff > 500) inc = -1;     // Switch to zoom in
-    else if (Zoff < 160) inc = 1; // Switch to zoom out
-  for (int i = 0; i < LinestoRender ; i++)
+  // Pre-compute hand degrees, x & y coords for a fast screen update
+  sdeg = SIXTIETH_RADIAN * ((0.001 * (cur_millis % 1000)) + ss); // 0-59 (includes millis)
+  nsx = cos(sdeg - RIGHT_ANGLE_RADIAN) * sHandLen + center;
+  nsy = sin(sdeg - RIGHT_ANGLE_RADIAN) * sHandLen + center;
+  if ((nsx != osx) || (nsy != osy))
   {
-    ORender[i] = Render[i]; // stores the old line segment so we can delete it later.
-    ProcessLine(&Render[i], Lines[i]); // converts the 3d line segments to 2d.
+    mdeg = (SIXTIETH * sdeg) + (SIXTIETH_RADIAN * mm); // 0-59 (includes seconds)
+    hdeg = (TWELFTH * mdeg) + (TWELFTH_RADIAN * hh);   // 0-11 (includes minutes)
+    mdeg -= RIGHT_ANGLE_RADIAN;
+    hdeg -= RIGHT_ANGLE_RADIAN;
+    nmx = cos(mdeg) * mHandLen + center;
+    nmy = sin(mdeg) * mHandLen + center;
+    nhx = cos(hdeg) * hHandLen + center;
+    nhy = sin(hdeg) * hHandLen + center;
+
+    // redraw hands
+    redraw_hands_cached_draw_and_erase();
+
+    ohx = nhx;
+    ohy = nhy;
+    omx = nmx;
+    omy = nmy;
+    osx = nsx;
+    osy = nsy;
+
+    delay(1);
   }
-  RenderImage(); // go draw it!
-  delay(14); // Delay to reduce loop rate (reduces flicker caused by aliasing with TFT screen refresh rate)
 }
-/***********************************************************************************************************************************/
-void RenderImage( void)
+
+void draw_round_clock_mark(int16_t innerR1, int16_t outerR1, int16_t innerR2, int16_t outerR2, int16_t innerR3, int16_t outerR3)
 {
-  // renders all the lines after erasing the old ones.
-  // in here is the only code actually interfacing with the OLED. so if you use a different lib, this is where to change it.
-  for (int i = 0; i < OldLinestoRender; i++ )
+  float x, y;
+  int16_t x0, x1, y0, y1, innerR, outerR;
+  uint16_t c;
+
+  for (uint8_t i = 0; i < 60; i++)
   {
-    tft.drawLine(ORender[i].p0.x, ORender[i].p0.y, ORender[i].p1.x, ORender[i].p1.y, BLACK); // erase the old lines.
+    if ((i % 15) == 0)
+    {
+      innerR = innerR1;
+      outerR = outerR1;
+      c = MARK_COLOR;
+    }
+    else if ((i % 5) == 0)
+    {
+      innerR = innerR2;
+      outerR = outerR2;
+      c = MARK_COLOR;
+    }
+    else
+    {
+      innerR = innerR3;
+      outerR = outerR3;
+      c = SUBMARK_COLOR;
+    }
+
+    mdeg = (SIXTIETH_RADIAN * i) - RIGHT_ANGLE_RADIAN;
+    x = cos(mdeg);
+    y = sin(mdeg);
+    x0 = x * outerR + center;
+    y0 = y * outerR + center;
+    x1 = x * innerR + center;
+    y1 = y * innerR + center;
+
+    gfx->drawLine(x0, y0, x1, y1, c);
   }
-  for (int i = 0; i < LinestoRender; i++ )
+}
+
+void draw_square_clock_mark(int16_t innerR1, int16_t outerR1, int16_t innerR2, int16_t outerR2, int16_t innerR3, int16_t outerR3)
+{
+  float x, y;
+  int16_t x0, x1, y0, y1, innerR, outerR;
+  uint16_t c;
+
+  for (uint8_t i = 0; i < 60; i++)
   {
-    uint16_t color = TFT_BLUE;
-    if (i < 4) color = TFT_RED;
-    if (i > 7) color = TFT_GREEN;
-    tft.drawLine(Render[i].p0.x, Render[i].p0.y, Render[i].p1.x, Render[i].p1.y, color);
+    if ((i % 15) == 0)
+    {
+      innerR = innerR1;
+      outerR = outerR1;
+      c = MARK_COLOR;
+    }
+    else if ((i % 5) == 0)
+    {
+      innerR = innerR2;
+      outerR = outerR2;
+      c = MARK_COLOR;
+    }
+    else
+    {
+      innerR = innerR3;
+      outerR = outerR3;
+      c = SUBMARK_COLOR;
+    }
+
+    if ((i >= 53) || (i < 8))
+    {
+      x = tan(SIXTIETH_RADIAN * i);
+      x0 = center + (x * outerR);
+      y0 = center + (1 - outerR);
+      x1 = center + (x * innerR);
+      y1 = center + (1 - innerR);
+    }
+    else if (i < 23)
+    {
+      y = tan((SIXTIETH_RADIAN * i) - RIGHT_ANGLE_RADIAN);
+      x0 = center + (outerR);
+      y0 = center + (y * outerR);
+      x1 = center + (innerR);
+      y1 = center + (y * innerR);
+    }
+    else if (i < 38)
+    {
+      x = tan(SIXTIETH_RADIAN * i);
+      x0 = center - (x * outerR);
+      y0 = center + (outerR);
+      x1 = center - (x * innerR);
+      y1 = center + (innerR);
+    }
+    else if (i < 53)
+    {
+      y = tan((SIXTIETH_RADIAN * i) - RIGHT_ANGLE_RADIAN);
+      x0 = center + (1 - outerR);
+      y0 = center - (y * outerR);
+      x1 = center + (1 - innerR);
+      y1 = center - (y * innerR);
+    }
+    gfx->drawLine(x0, y0, x1, y1, c);
   }
-  OldLinestoRender = LinestoRender;
-  Wire.beginTransmission(MPU);
-  Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
-  Wire.endTransmission(true);
-  Wire.requestFrom(MPU, 14, true); // request a total of 14 registers
-  AcX = Wire.read() << 8 | Wire.read(); // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
-  AcY = Wire.read() << 8 | Wire.read(); // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
-  AcZ = Wire.read() << 8 | Wire.read(); // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-  Tmp = Wire.read() << 8 | Wire.read(); // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
-  GyX = Wire.read() << 8 | Wire.read(); // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
-  GyY = Wire.read() << 8 | Wire.read(); // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
-  GyZ = Wire.read() << 8 | Wire.read(); // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
 }
-/***********************************************************************************************************************************/
-// Sets the global vars for the 3d transform. Any points sent through "process" will be transformed using these figures.
-// only needs to be called if Xan or Yan are changed.
-void SetVars(void)
+
+void redraw_hands_cached_draw_and_erase()
 {
-  float Xan2, Yan2, Zan2;
-  float s1, s2, s3, c1, c2, c3;
-  Xan2 = Xan / fact; // convert degrees to radians.
-  Yan2 = Yan / fact;
-  // Zan is assumed to be zero
-  s1 = sin(Yan2);
-  s2 = sin(Xan2);
-  c1 = cos(Yan2);
-  c2 = cos(Xan2);
-  xx = c1;
-  xy = 0;
-  xz = -s1;
-  yx = (s1 * s2);
-  yy = c2;
-  yz = (c1 * s2);
-  zx = (s1 * c2);
-  zy = -s2;
-  zz = (c1 * c2);
+  gfx->startWrite();
+  draw_and_erase_cached_line(center, center, nsx, nsy, SECOND_COLOR, cached_points, sHandLen + 1, false, false);
+  draw_and_erase_cached_line(center, center, nhx, nhy, HOUR_COLOR, cached_points + ((sHandLen + 1) * 2), hHandLen + 1, true, false);
+  draw_and_erase_cached_line(center, center, nmx, nmy, MINUTE_COLOR, cached_points + ((sHandLen + 1 + hHandLen + 1) * 2), mHandLen + 1, true, true);
+  gfx->endWrite();
 }
-/***********************************************************************************************************************************/
-// processes x1,y1,z1 and returns rx1,ry1 transformed by the variables set in SetVars()
-// fairly heavy on floating point here.
-// uses a bunch of global vars. Could be rewritten with a struct but not worth the effort.
-void ProcessLine(struct Line2d *ret, struct Line3d vec)
+
+void draw_and_erase_cached_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t color, int16_t *cache, int16_t cache_len, bool cross_check_second, bool cross_check_hour)
 {
-  float zvt1;
-  int xv1, yv1, zv1;
-  float zvt2;
-  int xv2, yv2, zv2;
-  int rx1, ry1;
-  int rx2, ry2;
-  int x1;
-  int y1;
-  int z1;
-  int x2;
-  int y2;
-  int z2;
-  int Ok;
-  x1 = vec.p0.x;
-  y1 = vec.p0.y;
-  z1 = vec.p0.z;
-  x2 = vec.p1.x;
-  y2 = vec.p1.y;
-  z2 = vec.p1.z;
-  Ok = 0; // defaults to not OK
-  xv1 = (x1 * xx) + (y1 * xy) + (z1 * xz);
-  yv1 = (x1 * yx) + (y1 * yy) + (z1 * yz);
-  zv1 = (x1 * zx) + (y1 * zy) + (z1 * zz);
-  zvt1 = zv1 - Zoff;
-  if ( zvt1 < -5) {
-    rx1 = 256 * (xv1 / zvt1) + Xoff;
-    ry1 = 256 * (yv1 / zvt1) + Yoff;
-    Ok = 1; // ok we are alright for point 1.
-  }
-  xv2 = (x2 * xx) + (y2 * xy) + (z2 * xz);
-  yv2 = (x2 * yx) + (y2 * yy) + (z2 * yz);
-  zv2 = (x2 * zx) + (y2 * zy) + (z2 * zz);
-  zvt2 = zv2 - Zoff;
-  if ( zvt2 < -5) {
-    rx2 = 256 * (xv2 / zvt2) + Xoff;
-    ry2 = 256 * (yv2 / zvt2) + Yoff;
-  } else
+#if defined(ESP8266)
+  yield();
+#endif
+  bool steep = _diff(y1, y0) > _diff(x1, x0);
+  if (steep)
   {
-    Ok = 0;
+    _swap_int16_t(x0, y0);
+    _swap_int16_t(x1, y1);
   }
-  if (Ok == 1) {
-    ret->p0.x = rx1;
-    ret->p0.y = ry1;
-    ret->p1.x = rx2;
-    ret->p1.y = ry2;
+
+  int16_t dx, dy;
+  dx = _diff(x1, x0);
+  dy = _diff(y1, y0);
+
+  int16_t err = dx / 2;
+  int8_t xstep = (x0 < x1) ? 1 : -1;
+  int8_t ystep = (y0 < y1) ? 1 : -1;
+  x1 += xstep;
+  int16_t x, y, ox, oy;
+  for (uint16_t i = 0; i <= dx; i++)
+  {
+    if (steep)
+    {
+      x = y0;
+      y = x0;
+    }
+    else
+    {
+      x = x0;
+      y = y0;
+    }
+    ox = *(cache + (i * 2));
+    oy = *(cache + (i * 2) + 1);
+    if ((x == ox) && (y == oy))
+    {
+      if (cross_check_second || cross_check_hour)
+      {
+        write_cache_pixel(x, y, color, cross_check_second, cross_check_hour);
+      }
+    }
+    else
+    {
+      write_cache_pixel(x, y, color, cross_check_second, cross_check_hour);
+      if ((ox > 0) || (oy > 0))
+      {
+        write_cache_pixel(ox, oy, BACKGROUND, cross_check_second, cross_check_hour);
+      }
+      *(cache + (i * 2)) = x;
+      *(cache + (i * 2) + 1) = y;
+    }
+    if (err < dy)
+    {
+      y0 += ystep;
+      err += dx;
+    }
+    err -= dy;
+    x0 += xstep;
   }
-  // The ifs here are checks for out of bounds. needs a bit more code here to "safe" lines that will be way out of whack, so they don't get drawn and cause screen garbage.
+  for (uint16_t i = dx + 1; i < cache_len; i++)
+  {
+    ox = *(cache + (i * 2));
+    oy = *(cache + (i * 2) + 1);
+    if ((ox > 0) || (oy > 0))
+    {
+      write_cache_pixel(ox, oy, BACKGROUND, cross_check_second, cross_check_hour);
+    }
+    *(cache + (i * 2)) = 0;
+    *(cache + (i * 2) + 1) = 0;
+  }
 }
-// line segments to draw a cube. basically p0 to p1. p1 to p2. p2 to p3 so on.
-void cube(void)
+
+void write_cache_pixel(int16_t x, int16_t y, int16_t color, bool cross_check_second, bool cross_check_hour)
 {
-  // Front Face.
-  Lines[0].p0.x = -50;
-  Lines[0].p0.y = -50;
-  Lines[0].p0.z = 50;
-  Lines[0].p1.x = 50;
-  Lines[0].p1.y = -50;
-  Lines[0].p1.z = 50;
-  Lines[1].p0.x = 50;
-  Lines[1].p0.y = -50;
-  Lines[1].p0.z = 50;
-  Lines[1].p1.x = 50;
-  Lines[1].p1.y = 50;
-  Lines[1].p1.z = 50;
-  Lines[2].p0.x = 50;
-  Lines[2].p0.y = 50;
-  Lines[2].p0.z = 50;
-  Lines[2].p1.x = -50;
-  Lines[2].p1.y = 50;
-  Lines[2].p1.z = 50;
-  Lines[3].p0.x = -50;
-  Lines[3].p0.y = 50;
-  Lines[3].p0.z = 50;
-  Lines[3].p1.x = -50;
-  Lines[3].p1.y = -50;
-  Lines[3].p1.z = 50;
-  //back face.
-  Lines[4].p0.x = -50;
-  Lines[4].p0.y = -50;
-  Lines[4].p0.z = -50;
-  Lines[4].p1.x = 50;
-  Lines[4].p1.y = -50;
-  Lines[4].p1.z = -50;
-  Lines[5].p0.x = 50;
-  Lines[5].p0.y = -50;
-  Lines[5].p0.z = -50;
-  Lines[5].p1.x = 50;
-  Lines[5].p1.y = 50;
-  Lines[5].p1.z = -50;
-  Lines[6].p0.x = 50;
-  Lines[6].p0.y = 50;
-  Lines[6].p0.z = -50;
-  Lines[6].p1.x = -50;
-  Lines[6].p1.y = 50;
-  Lines[6].p1.z = -50;
-  Lines[7].p0.x = -50;
-  Lines[7].p0.y = 50;
-  Lines[7].p0.z = -50;
-  Lines[7].p1.x = -50;
-  Lines[7].p1.y = -50;
-  Lines[7].p1.z = -50;
-  // now the 4 edge lines.
-  Lines[8].p0.x = -50;
-  Lines[8].p0.y = -50;
-  Lines[8].p0.z = 50;
-  Lines[8].p1.x = -50;
-  Lines[8].p1.y = -50;
-  Lines[8].p1.z = -50;
-  Lines[9].p0.x = 50;
-  Lines[9].p0.y = -50;
-  Lines[9].p0.z = 50;
-  Lines[9].p1.x = 50;
-  Lines[9].p1.y = -50;
-  Lines[9].p1.z = -50;
-  Lines[10].p0.x = -50;
-  Lines[10].p0.y = 50;
-  Lines[10].p0.z = 50;
-  Lines[10].p1.x = -50;
-  Lines[10].p1.y = 50;
-  Lines[10].p1.z = -50;
-  Lines[11].p0.x = 50;
-  Lines[11].p0.y = 50;
-  Lines[11].p0.z = 50;
-  Lines[11].p1.x = 50;
-  Lines[11].p1.y = 50;
-  Lines[11].p1.z = -50;
-  LinestoRender = 12;
-  OldLinestoRender = LinestoRender;
+  int16_t *cache = cached_points;
+  if (cross_check_second)
+  {
+    for (uint16_t i = 0; i <= sHandLen; i++)
+    {
+      if ((x == *(cache++)) && (y == *(cache)))
+      {
+        return;
+      }
+      cache++;
+    }
+  }
+  if (cross_check_hour)
+  {
+    cache = cached_points + ((sHandLen + 1) * 2);
+    for (uint16_t i = 0; i <= hHandLen; i++)
+    {
+      if ((x == *(cache++)) && (y == *(cache)))
+      {
+        return;
+      }
+      cache++;
+    }
+  }
+  gfx->writePixel(x, y, color);
 }
+
