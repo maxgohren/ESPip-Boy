@@ -1,9 +1,10 @@
 #include "CST816S.h"
+#include <Wire.h>
 #include "SparkFun_BMI270_Arduino_Library.h"
 #include <Arduino_GFX_Library.h>
 #include "display.h"
+
 // ----- Pin Definitions -----
-#define GFX_BL 14
 #define LCD_DC     27
 #define LCD_RST    26
 #define LCD_CS     15
@@ -35,12 +36,18 @@ Arduino_GFX *gfx = new Arduino_ST7789(
 );
 
 // ----- Touch Setup -----
-CST816S touch(IIC_SDA, IIC_SCL, TP_RST, TP_INT);
+// Touch screen currently doesn't work. Problem with chip I believe. Disabling
+// to not interfere with imu setup.
+//CST816S touch(IIC_SDA, IIC_SCL, TP_RST, TP_INT);
 
 // IMU Setup
 BMI270 imu;
 uint8_t i2cAddress = BMI2_I2C_PRIM_ADDR; // 0x68
 volatile bool imuInterruptOccurred = false;
+extern bool screenOn;
+unsigned long lastWakeTime = 0;
+unsigned long lastFacingTime = 0;
+unsigned long lastIMUReading = 0;
 
 static int16_t w, h, center;
 static int16_t hHandLen, mHandLen, sHandLen, markLen;
@@ -73,10 +80,9 @@ void setup(void)
   }
   gfx->fillScreen(BACKGROUND);
 
-#ifdef GFX_BL
-  pinMode(GFX_BL, OUTPUT);
-  digitalWrite(GFX_BL, HIGH);
-#endif
+  // Backlight control
+  display_bl_setup();
+  display_screen_off();
 
   // init LCD constant
   w = gfx->width();
@@ -108,6 +114,7 @@ void setup(void)
 
   targetTime = ((millis() / 1000) + 1) * 1000;
 
+  Wire.begin(IIC_SDA, IIC_SCL);
   // Init IMU
     while(imu.beginI2C(i2cAddress) != BMI2_OK)
   {
@@ -116,9 +123,9 @@ void setup(void)
   }
   Serial.println("BMI270 connected!");
   imu.enableFeature(BMI2_WRIST_WEAR_WAKE_UP);
-  imu.enableFeature(BMI2_WRIST_GESTURE);
+  //imu.enableFeature(BMI2_WRIST_GESTURE);
   imu.mapInterruptToPin(BMI2_WRIST_WEAR_WAKE_UP_INT, BMI2_INT1);
-  imu.mapInterruptToPin(BMI2_WRIST_GESTURE_INT, BMI2_INT1);
+  //imu.mapInterruptToPin(BMI2_WRIST_GESTURE_INT, BMI2_INT1);
 
   // IMU Interrupt Setup
   bmi2_int_pin_config intPinConfig;
@@ -132,84 +139,88 @@ void setup(void)
   attachInterrupt(digitalPinToInterrupt(IMU_INT), imuInterruptHandler, RISING);
 
   Serial.println("ESPip-Boy init complete.");
+
+}
+
+bool isWatchFacing(float x, float y, float z) {
+  return ( y > 0.6f && y < 0.9f 
+             && z > 0.5f && 
+             abs(x) < 0.5f );
 }
 
 void loop()
 {
-  // Wait for interrupt to occur
+  unsigned long currTime = millis();
+
+  double x = imu.data.accelX;
+  double y = imu.data.accelY;
+  double z = imu.data.accelZ;
+
+  if (currTime - lastIMUReading >= 20) {
+    imu.getSensorData();
+    lastIMUReading = currTime;
+    // Print acceleration data
+    Serial.print("Acceleration in g's");
+    Serial.print("\t");
+    Serial.print("X: ");
+    Serial.print(x, 3);
+    Serial.print("\t");
+    Serial.print("Y: ");
+    Serial.print(y, 3);
+    Serial.print("\t");
+    Serial.print("Z: ");
+    Serial.print(z, 3);
+    Serial.println();
+  }
+
   if(imuInterruptOccurred)
   {
-      // Reset flag for next interrupt
-      interruptOccurred = false;
-
-      Serial.print("Interrupt occurred!");
-      Serial.print("\t");
-
-      // Get the interrupt status to know which condition triggered
+      // Reset flag and get status
+      imuInterruptOccurred = false;
       uint16_t interruptStatus = 0;
       imu.getInterruptStatus(&interruptStatus);
 
-      // Check if this is the correct interrupt condition
       if(interruptStatus & BMI270_WRIST_WAKE_UP_STATUS_MASK)
       {
-          Serial.print("Wake up!");
+          Serial.println("Wrist Focus Gesture Detected! Turning backlight on!");
+          display_screen_on();
+          lastWakeTime = millis();
+          lastFacingTime = millis();
+      }
+  }
 
-          Serial.print("\t");
-      }
-      if(interruptStatus & BMI270_WRIST_GEST_STATUS_MASK)
-      {
-          Serial.print("Gesture: ");
-          
-          // Get the gesture
-          uint8_t gesture = 0;
-          imu.getWristGesture(&gesture);
+  // Screen off if watch is out of face up position
+  if (screenOn) {
 
-          // Print gesture
-          switch(gesture)
-          {
-              case BMI2_WRIST_GESTURE_ARM_DOWN:
-              {
-                  Serial.print("Arm down");
-                  break;
-              }
-              case BMI2_WRIST_GESTURE_ARM_UP:
-              {
-                  Serial.print("Arm up");
-                  break;
-              }
-              case BMI2_WRIST_GESTURE_SHAKE_JIGGLE:
-              {
-                  Serial.print("Shake jiggle");
-                  break;
-              }
-              case BMI2_WRIST_GESTURE_FLICK_IN:
-              {
-                  Serial.print("Flick in");
-                  break;
-              }
-              case BMI2_WRIST_GESTURE_FLICK_OUT:
-              {
-                  Serial.print("Flick out");
-                  break;
-              }
-              default:
-              {
-                  Serial.print("Unknown!");
-                  break;
-              }
-          }
-      }
-      if(!(interruptStatus & (BMI270_WRIST_WAKE_UP_STATUS_MASK | BMI270_WRIST_GEST_STATUS_MASK)))
-      {
-          Serial.print("Unknown interrupt condition!");
-      }
-      
-      Serial.println();
+    if (isWatchFacing(x, y, z)) {
+      lastFacingTime = millis();
+      Serial.printf("Last facing time: %lu\n", lastFacingTime);
+    }
+
+    // Timeout display when out of focus
+    currTime = millis();
+    const int screen_focus_timeout_ms = 2000;
+    if (currTime - lastFacingTime > screen_focus_timeout_ms) {
+      Serial.printf("Screen has been out of focus for more than %d ms, turning off\n", screen_focus_timeout_ms);
+      display_screen_off();
+    }
+
+    // General timeout
+    const int screen_timeout_ms = 15000;
+    if (millis() - lastWakeTime > screen_timeout_ms) {
+      Serial.printf("Screen has been on for more than %d, turning off\n", screen_timeout_ms);
+      display_screen_off();
+    }
+  } 
+
+  if (!screenOn) {
+    if (isWatchFacing(x, y, z)){
+      display_screen_on();
+    }
   }
 
 
-  unsigned long cur_millis = millis();
-  if (cur_millis >= targetTime)
+  if (currTime >= targetTime)
   {
     targetTime += 1000;
     ss++; // Advance second
@@ -230,7 +241,7 @@ void loop()
   }
 
   // Pre-compute hand degrees, x & y coords for a fast screen update
-  sdeg = SIXTIETH_RADIAN * ((0.001 * (cur_millis % 1000)) + ss); // 0-59 (includes millis)
+  sdeg = SIXTIETH_RADIAN * ((0.001 * (currTime % 1000)) + ss); // 0-59 (includes millis)
   nsx = cos(sdeg - RIGHT_ANGLE_RADIAN) * sHandLen + center;
   nsy = sin(sdeg - RIGHT_ANGLE_RADIAN) * sHandLen + center;
   if ((nsx != osx) || (nsy != osy))
@@ -253,8 +264,6 @@ void loop()
     omy = nmy;
     osx = nsx;
     osy = nsy;
-
-    delay(1);
   }
 }
 

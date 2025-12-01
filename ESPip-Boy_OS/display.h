@@ -11,8 +11,30 @@
 #define TWELFTH_RADIAN 0.52359878
 #define RIGHT_ANGLE_RADIAN 1.5707963
 
+
+#define BL_PIN 14
+
 static uint8_t conv2d(const char *p)
 {
   uint8_t v = 0;
   return (10 * (*p - '0')) + (*++p - '0');
+}
+
+extern bool screenOn = false;
+
+void display_bl_setup()
+{
+  pinMode(BL_PIN, OUTPUT);
+}
+
+void display_screen_off()
+{
+  digitalWrite(BL_PIN, LOW);
+  screenOn = false;
+}
+
+void display_screen_on()
+{
+  digitalWrite(BL_PIN, HIGH);
+  screenOn = true;
 }
