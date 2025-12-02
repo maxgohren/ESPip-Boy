@@ -2,7 +2,12 @@
 #include <Wire.h>
 #include "SparkFun_BMI270_Arduino_Library.h"
 #include <Arduino_GFX_Library.h>
+#include <WiFi.h>
+
+#include "clock.h"
 #include "display.h"
+#include "wifi_config.h"
+
 
 // ----- Pin Definitions -----
 #define LCD_DC     27
@@ -40,6 +45,8 @@ Arduino_GFX *gfx = new Arduino_ST7789(
 // to not interfere with imu setup.
 //CST816S touch(IIC_SDA, IIC_SCL, TP_RST, TP_INT);
 
+const long gmtOffset_sec = -5 * 60 * 60; // EST is -5
+
 // IMU Setup
 BMI270 imu;
 uint8_t i2cAddress = BMI2_I2C_PRIM_ADDR; // 0x68
@@ -56,7 +63,7 @@ static int16_t osx = 0, osy = 0, omx = 0, omy = 0, ohx = 0, ohy = 0; // Saved H,
 static int16_t nsx, nsy, nmx, nmy, nhx, nhy;                         // H, M, S x & y coords
 static int16_t xMin, yMin, xMax, yMax;                               // redraw range
 static int16_t hh, mm, ss;
-static unsigned long targetTime; // next action time
+static unsigned long targetTime; // analog target
 
 static int16_t *cached_points;
 static uint16_t cached_points_idx = 0;
@@ -138,6 +145,24 @@ void setup(void)
   imu.setInterruptPinConfig(intPinConfig);
   attachInterrupt(digitalPinToInterrupt(IMU_INT), imuInterruptHandler, RISING);
 
+  /* Update clock from the internet */
+  /*
+  WiFi.begin(SSID_NAME, SSID_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print('.');
+    delay(500);
+  }
+  setClock();
+  WiFi.disconnect();
+  WiFi.mode(WIFI_OFF);
+  */
+
+  int textSize = gfx->width() / 72;
+
+  gfx->setTextColor(RGB565_WHITE, RGB565_BLACK);
+  gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
+
   Serial.println("ESPip-Boy init complete.");
 
 }
@@ -160,6 +185,7 @@ void loop()
     imu.getSensorData();
     lastIMUReading = currTime;
     // Print acceleration data
+    /*
     Serial.print("Acceleration in g's");
     Serial.print("\t");
     Serial.print("X: ");
@@ -171,6 +197,7 @@ void loop()
     Serial.print("Z: ");
     Serial.print(z, 3);
     Serial.println();
+    */
   }
 
   if(imuInterruptOccurred)
@@ -194,7 +221,6 @@ void loop()
 
     if (isWatchFacing(x, y, z)) {
       lastFacingTime = millis();
-      Serial.printf("Last facing time: %lu\n", lastFacingTime);
     }
 
     // Timeout display when out of focus
@@ -238,6 +264,7 @@ void loop()
         }
       }
     }
+
   }
 
   // Pre-compute hand degrees, x & y coords for a fast screen update
@@ -265,6 +292,16 @@ void loop()
     osx = nsx;
     osy = nsy;
   }
+
+  // Digital clock logic
+  char timeStr[9];
+  time_t now;
+  time(&now);
+  now += gmtOffset_sec;
+  struct tm *tmLocal = localtime(&now);
+  strftime(timeStr, sizeof(timeStr), "%H:%M:%S", tmLocal);
+  gfx->setCursor(20, 240);
+  gfx->print(timeStr);
 }
 
 void draw_round_clock_mark(int16_t innerR1, int16_t outerR1, int16_t innerR2, int16_t outerR2, int16_t innerR3, int16_t outerR3)

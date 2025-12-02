@@ -6,6 +6,7 @@
 .docs/.obsidian
 .datasheets/*
 *.swp
+ESPip-Boy_OS/wifi_config.h
 
 
 docs/.obsidian/
