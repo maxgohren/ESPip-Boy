@@ -1,3 +1,5 @@
+#include "pinout.h"
+
 #define BACKGROUND RGB565_BLACK
 #define MARK_COLOR RGB565_WHITE
 #define SUBMARK_COLOR RGB565_DARKGREY // RGB565_LIGHTGREY
@@ -11,8 +13,6 @@
 #define TWELFTH_RADIAN 0.52359878
 #define RIGHT_ANGLE_RADIAN 1.5707963
 
-
-#define BL_PIN 14
 
 static uint8_t conv2d(const char *p)
 {

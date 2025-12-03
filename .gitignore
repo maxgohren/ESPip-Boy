@@ -12,3 +12,4 @@ ESPip-Boy_OS/wifi_config.h
 docs/.obsidian/
 datasheets/*
 test_modules/esp32_sdcard_audio
+tags

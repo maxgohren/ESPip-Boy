@@ -1,3 +1,17 @@
+# December  3 2025 - Wednesday 12:23 AM
+Working on the SW to get it to a decent, useable state. Currently trying to
+drain the battery to let the fuel gauge learn the battery State of charge. 
+
+I am doing this by just printing the battery voltage to the display, and never
+sleeping it. I've disabled the sleeping as I've added it right after the screen
+off calls. Soon, I will have a watch that turns on when the user moves the
+right amount (the watch focus gesture is pretty bogus so far), displays the
+time and then sleeps after a 10 seconds of inactivity. 
+
+Then I will add NTP time sync and time sync with the RTC after perhaps 24 hours
+for the WiFi sync and 5 wakeups with the RTC, to be tuned of course, storing
+the boot count in the RTC memory!
+
 # December  1 2025 - Monday 12:33 AM
 This is a pretty surreal feeling now, as I just finished up the auto wake
 feature for the display on my smartwatch. I am actually wearing it, after
