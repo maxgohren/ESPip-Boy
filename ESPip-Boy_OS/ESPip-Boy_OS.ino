@@ -2,15 +2,14 @@
 #include <Wire.h>
 #include "SparkFun_BMI270_Arduino_Library.h"
 #include <Arduino_GFX_Library.h>
-#include <WiFi.h>
 
 #include "pinout.h"
 
 #include "clock.h"
 #include "display.h"
-#include "wifi_config.h"
 #include "sleep.h"
 #include "fuel.h"
+#include "loading_screen.h"
 
 // IMU Setup
 BMI270 imu;
@@ -67,60 +66,36 @@ void setup(void)
   Serial.println("Arduino_GFX Clock example");
   Serial.println(__TIME__);
 
+  // Backlight control
+  display_bl_setup();
+  display_screen_on();
+
   // Init Display
   if (!gfx->begin())
   {
     Serial.println("gfx->begin() failed!");
   }
   gfx->fillScreen(BACKGROUND);
+  gfx->draw16bitRGBBitmap(gfx->width() / 2 - IMG_WIDTH / 2 , 
+                          gfx->height() / 2 - IMG_HEIGHT /2, 
+                          (const uint16_t*)vault_boy_pip_boy_color, 
+                          IMG_HEIGHT, 
+                          IMG_WIDTH);
+  Serial.printf("Finished drawing loading screen: w: %d, h: %d\n", gfx->width(), gfx->height());
 
-  // Backlight control
-  display_bl_setup();
-  display_screen_off();
+  gfx->setTextColor(RGB565_WHITE, RGB565_BLACK);
+  int textSize = gfx->width() / 94;
+  gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
+  gfx->setCursor(20, 50); // Centered above pip
+  gfx->print("Loading ESPip-Boy");
 
-  // init LCD constant
-  w = gfx->width();
-  h = gfx->height();
-  if (w < h)
-  {
-    center = w / 2;
-  }
-  else
-  {
-    center = h / 2;
-  }
-  hHandLen = center * 3 / 8;
-  mHandLen = center * 2 / 3;
-  sHandLen = center * 5 / 6;
-  markLen = sHandLen / 6;
-  cached_points = (int16_t *)malloc((hHandLen + 1 + mHandLen + 1 + sHandLen + 1) * 2 * 2);
 
-  // Draw 60 clock marks
-  draw_round_clock_mark(
-      // draw_square_clock_mark(
-      center - markLen, center,
-      center - (markLen * 2 / 3), center,
-      center - (markLen / 2), center);
-
+  // Set up time variables
   hh = conv2d(__TIME__);
   mm = conv2d(__TIME__ + 3);
   ss = conv2d(__TIME__ + 6);
-
   targetTime = ((millis() / 1000) + 1) * 1000;
-
-  /* Update clock from the internet */
-  /*
-  WiFi.begin(SSID_NAME, SSID_PASSWORD);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.print('.');
-    delay(500);
-  }
-  setClock();
-  WiFi.disconnect();
-  WiFi.mode(WIFI_OFF);
-  */
-
+  setClock(&Serial);
 
   Serial.println("ESPip-Boy init complete.");
 
@@ -164,6 +139,9 @@ void setup(void)
   attachInterrupt(digitalPinToInterrupt(IMU_INT), imuInterruptHandler, RISING);
 
   init_sleep_mode(&Serial);
+
+  // Clear screen after loading
+  gfx->fillScreen(BACKGROUND); 
 }
 
 bool isWatchFacing(float x, float y, float z) {
@@ -271,48 +249,29 @@ void loop()
     }
 
     // Digital clock logic
-    char timeStr[9];
     time_t now;
     time(&now);
     now += gmtOffset_sec;
     struct tm *tmLocal = localtime(&now);
-    strftime(timeStr, sizeof(timeStr), "%H:%M:%S", tmLocal);
-    int textSize = gfx->width() / 72;
+
+    // Text Formatting
+    int textSize = gfx->width() / 94;
     gfx->setTextColor(RGB565_WHITE, RGB565_BLACK);
     gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
+
+    // Print Date /* helpful strftime formatting site: https://strftime.net/ */
+    char dateStr[50];
+    strftime(dateStr, sizeof(dateStr), "%a %e %b %Y", tmLocal);
     gfx->setCursor(20, 20);
+    gfx->print(dateStr);
+
+    // Print Time
+    char timeStr[15];
+    strftime(timeStr, sizeof(timeStr), "%r", tmLocal);
+    gfx->setCursor(20, 40);
     gfx->print(timeStr);
 
   }
-
-  /*
-  // Pre-compute hand degrees, x & y coords for a fast screen update
-  sdeg = SIXTIETH_RADIAN * ((0.001 * (currTime % 1000)) + ss); // 0-59 (includes millis)
-  nsx = cos(sdeg - RIGHT_ANGLE_RADIAN) * sHandLen + center;
-  nsy = sin(sdeg - RIGHT_ANGLE_RADIAN) * sHandLen + center;
-  if ((nsx != osx) || (nsy != osy))
-  {
-    mdeg = (SIXTIETH * sdeg) + (SIXTIETH_RADIAN * mm); // 0-59 (includes seconds)
-    hdeg = (TWELFTH * mdeg) + (TWELFTH_RADIAN * hh);   // 0-11 (includes minutes)
-    mdeg -= RIGHT_ANGLE_RADIAN;
-    hdeg -= RIGHT_ANGLE_RADIAN;
-    nmx = cos(mdeg) * mHandLen + center;
-    nmy = sin(mdeg) * mHandLen + center;
-    nhx = cos(hdeg) * hHandLen + center;
-    nhy = sin(hdeg) * hHandLen + center;
-
-    // redraw hands
-    redraw_hands_cached_draw_and_erase();
-
-    ohx = nhx;
-    ohy = nhy;
-    omx = nmx;
-    omy = nmy;
-    osx = nsx;
-    osy = nsy;
-  }
-  */
-
 
   // Print Gas Values
   static int lastGasUpdate = 0;
@@ -320,13 +279,20 @@ void loop()
     lastGasUpdate = currTime;
     int v =   fuelGauge.readVoltage();
     int soc = fuelGauge.readSOC();
+    int pwr = fuelGauge.readAveragePower();
     int ma =  fuelGauge.readCurrent();
+
+    /*
+    fuelGauge.writeControlWord(0x0001);
+    uint16_t device_id = fuelGauge.readControlWord();
+    Serial.printf("Device ID: %x\n", device_id);
+    */
 
     Serial.print("Voltage: ");
     Serial.print(v);
     Serial.println(" mV");
     char fuelVStr[100];
-    snprintf(fuelVStr, sizeof(fuelVStr), "Voltage: %d", v);
+    snprintf(fuelVStr, sizeof(fuelVStr), "Voltage: %d mV", v);
     int textSize = gfx->width() / 120;
     gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
     gfx->setCursor(20, 80);
@@ -349,7 +315,13 @@ void loop()
     gfx->setCursor(20, 120);
     gfx->print(fuelAStr);
 
-
+    Serial.print("Power: ");
+    Serial.print(ma);
+    Serial.println(" mW");
+    char fuelPStr[100];
+    snprintf(fuelPStr, sizeof(fuelPStr), "Power: %d mW", pwr);
+    gfx->setCursor(20, 140);
+    gfx->print(fuelPStr);
   }
 
   // General timeout
@@ -363,217 +335,3 @@ void loop()
   }
   */
 }
-
-void draw_round_clock_mark(int16_t innerR1, int16_t outerR1, int16_t innerR2, int16_t outerR2, int16_t innerR3, int16_t outerR3)
-{
-  float x, y;
-  int16_t x0, x1, y0, y1, innerR, outerR;
-  uint16_t c;
-
-  for (uint8_t i = 0; i < 60; i++)
-  {
-    if ((i % 15) == 0)
-    {
-      innerR = innerR1;
-      outerR = outerR1;
-      c = MARK_COLOR;
-    }
-    else if ((i % 5) == 0)
-    {
-      innerR = innerR2;
-      outerR = outerR2;
-      c = MARK_COLOR;
-    }
-    else
-    {
-      innerR = innerR3;
-      outerR = outerR3;
-      c = SUBMARK_COLOR;
-    }
-
-    mdeg = (SIXTIETH_RADIAN * i) - RIGHT_ANGLE_RADIAN;
-    x = cos(mdeg);
-    y = sin(mdeg);
-    x0 = x * outerR + center;
-    y0 = y * outerR + center;
-    x1 = x * innerR + center;
-    y1 = y * innerR + center;
-
-    gfx->drawLine(x0, y0, x1, y1, c);
-  }
-}
-
-void draw_square_clock_mark(int16_t innerR1, int16_t outerR1, int16_t innerR2, int16_t outerR2, int16_t innerR3, int16_t outerR3)
-{
-  float x, y;
-  int16_t x0, x1, y0, y1, innerR, outerR;
-  uint16_t c;
-
-  for (uint8_t i = 0; i < 60; i++)
-  {
-    if ((i % 15) == 0)
-    {
-      innerR = innerR1;
-      outerR = outerR1;
-      c = MARK_COLOR;
-    }
-    else if ((i % 5) == 0)
-    {
-      innerR = innerR2;
-      outerR = outerR2;
-      c = MARK_COLOR;
-    }
-    else
-    {
-      innerR = innerR3;
-      outerR = outerR3;
-      c = SUBMARK_COLOR;
-    }
-
-    if ((i >= 53) || (i < 8))
-    {
-      x = tan(SIXTIETH_RADIAN * i);
-      x0 = center + (x * outerR);
-      y0 = center + (1 - outerR);
-      x1 = center + (x * innerR);
-      y1 = center + (1 - innerR);
-    }
-    else if (i < 23)
-    {
-      y = tan((SIXTIETH_RADIAN * i) - RIGHT_ANGLE_RADIAN);
-      x0 = center + (outerR);
-      y0 = center + (y * outerR);
-      x1 = center + (innerR);
-      y1 = center + (y * innerR);
-    }
-    else if (i < 38)
-    {
-      x = tan(SIXTIETH_RADIAN * i);
-      x0 = center - (x * outerR);
-      y0 = center + (outerR);
-      x1 = center - (x * innerR);
-      y1 = center + (innerR);
-    }
-    else if (i < 53)
-    {
-      y = tan((SIXTIETH_RADIAN * i) - RIGHT_ANGLE_RADIAN);
-      x0 = center + (1 - outerR);
-      y0 = center - (y * outerR);
-      x1 = center + (1 - innerR);
-      y1 = center - (y * innerR);
-    }
-    gfx->drawLine(x0, y0, x1, y1, c);
-  }
-}
-
-void redraw_hands_cached_draw_and_erase()
-{
-  gfx->startWrite();
-  draw_and_erase_cached_line(center, center, nsx, nsy, SECOND_COLOR, cached_points, sHandLen + 1, false, false);
-  draw_and_erase_cached_line(center, center, nhx, nhy, HOUR_COLOR, cached_points + ((sHandLen + 1) * 2), hHandLen + 1, true, false);
-  draw_and_erase_cached_line(center, center, nmx, nmy, MINUTE_COLOR, cached_points + ((sHandLen + 1 + hHandLen + 1) * 2), mHandLen + 1, true, true);
-  gfx->endWrite();
-}
-
-void draw_and_erase_cached_line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t color, int16_t *cache, int16_t cache_len, bool cross_check_second, bool cross_check_hour)
-{
-#if defined(ESP8266)
-  yield();
-#endif
-  bool steep = _diff(y1, y0) > _diff(x1, x0);
-  if (steep)
-  {
-    _swap_int16_t(x0, y0);
-    _swap_int16_t(x1, y1);
-  }
-
-  int16_t dx, dy;
-  dx = _diff(x1, x0);
-  dy = _diff(y1, y0);
-
-  int16_t err = dx / 2;
-  int8_t xstep = (x0 < x1) ? 1 : -1;
-  int8_t ystep = (y0 < y1) ? 1 : -1;
-  x1 += xstep;
-  int16_t x, y, ox, oy;
-  for (uint16_t i = 0; i <= dx; i++)
-  {
-    if (steep)
-    {
-      x = y0;
-      y = x0;
-    }
-    else
-    {
-      x = x0;
-      y = y0;
-    }
-    ox = *(cache + (i * 2));
-    oy = *(cache + (i * 2) + 1);
-    if ((x == ox) && (y == oy))
-    {
-      if (cross_check_second || cross_check_hour)
-      {
-        write_cache_pixel(x, y, color, cross_check_second, cross_check_hour);
-      }
-    }
-    else
-    {
-      write_cache_pixel(x, y, color, cross_check_second, cross_check_hour);
-      if ((ox > 0) || (oy > 0))
-      {
-        write_cache_pixel(ox, oy, BACKGROUND, cross_check_second, cross_check_hour);
-      }
-      *(cache + (i * 2)) = x;
-      *(cache + (i * 2) + 1) = y;
-    }
-    if (err < dy)
-    {
-      y0 += ystep;
-      err += dx;
-    }
-    err -= dy;
-    x0 += xstep;
-  }
-  for (uint16_t i = dx + 1; i < cache_len; i++)
-  {
-    ox = *(cache + (i * 2));
-    oy = *(cache + (i * 2) + 1);
-    if ((ox > 0) || (oy > 0))
-    {
-      write_cache_pixel(ox, oy, BACKGROUND, cross_check_second, cross_check_hour);
-    }
-    *(cache + (i * 2)) = 0;
-    *(cache + (i * 2) + 1) = 0;
-  }
-}
-
-void write_cache_pixel(int16_t x, int16_t y, int16_t color, bool cross_check_second, bool cross_check_hour)
-{
-  int16_t *cache = cached_points;
-  if (cross_check_second)
-  {
-    for (uint16_t i = 0; i <= sHandLen; i++)
-    {
-      if ((x == *(cache++)) && (y == *(cache)))
-      {
-        return;
-      }
-      cache++;
-    }
-  }
-  if (cross_check_hour)
-  {
-    cache = cached_points + ((sHandLen + 1) * 2);
-    for (uint16_t i = 0; i <= hHandLen; i++)
-    {
-      if ((x == *(cache++)) && (y == *(cache)))
-      {
-        return;
-      }
-      cache++;
-    }
-  }
-  gfx->writePixel(x, y, color);
-}
-

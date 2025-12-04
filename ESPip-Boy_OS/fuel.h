@@ -14,19 +14,18 @@ public:
     }
 
     uint16_t readSOC() {
-        return readWord(0x2C); // %
+        return readWord(0x1C); // %
     }
 
     int16_t readCurrent() {
         return (int16_t)readWord(0x10); // mA (signed)
     }
 
-    float readTemperature() {
-        uint16_t temp = readWord(0x06); // 0.1K units
-        return (temp / 10.0f) - 273.15f; // °C
+    int16_t readAveragePower() {
+        return (int16_t)readWord(0x18); // mW
     }
-    
-      void writeControlWord(uint16_t control) {
+
+    void writeControlWord(uint16_t control) {
       Wire.beginTransmission(BQ27421_ADDRESS);
       Wire.write(0x00);
       Wire.write(control & 0xFF);
