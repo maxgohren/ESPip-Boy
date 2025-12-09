@@ -101,10 +101,16 @@ void setup(void)
 
   Wire.begin(IIC_SDA, IIC_SCL);
   // Init IMU
-    while(imu.beginI2C(i2cAddress) != BMI2_OK)
+  while(imu.beginI2C(i2cAddress) != BMI2_OK)
   {
+      static int retries = 0;
       Serial.println("Error: BMI270 not connected, check wiring and I2C address!");
       delay(1000);
+      retries++;
+      if (retries == 5) {
+        break;
+      }
+      Serial.println("BMI270 not initialized, must press button to turn screen on");
   }
   Serial.println("BMI270 connected!");
 
@@ -262,13 +268,18 @@ void loop()
     // Print Date /* helpful strftime formatting site: https://strftime.net/ */
     char dateStr[50];
     strftime(dateStr, sizeof(dateStr), "%a %e %b %Y", tmLocal);
-    gfx->setCursor(20, 20);
+    gfx->setCursor(20, 160);
     gfx->print(dateStr);
+
+    // Text Formatting
+    textSize = gfx->width() / 52;
+    gfx->setTextColor(RGB565_WHITE, RGB565_BLACK);
+    gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
 
     // Print Time
     char timeStr[15];
-    strftime(timeStr, sizeof(timeStr), "%r", tmLocal);
-    gfx->setCursor(20, 40);
+    strftime(timeStr, sizeof(timeStr), "%I:%M %p", tmLocal);
+    gfx->setCursor(20, 80);
     gfx->print(timeStr);
 
   }
@@ -288,6 +299,20 @@ void loop()
     Serial.printf("Device ID: %x\n", device_id);
     */
 
+    int textSize = gfx->width() / 94;
+    gfx->setTextColor(RGB565_WHITE, RGB565_BLACK);
+    gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
+
+    Serial.print("SOC: ");
+    Serial.print(soc);
+    Serial.println(" %");
+    char fuelSOCStr[100];
+    snprintf(fuelSOCStr, sizeof(fuelSOCStr), "BAT: [%d%]", soc);
+    gfx->setCursor(20, 180);
+    gfx->print(fuelSOCStr);
+
+
+#if 0
     Serial.print("Voltage: ");
     Serial.print(v);
     Serial.println(" mV");
@@ -297,15 +322,6 @@ void loop()
     gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
     gfx->setCursor(20, 80);
     gfx->print(fuelVStr);
-
-    Serial.print("SOC: ");
-    Serial.print(soc);
-    Serial.println(" %");
-    char fuelSOCStr[100];
-    snprintf(fuelSOCStr, sizeof(fuelSOCStr), "SOC: %d %", soc);
-    gfx->setCursor(20, 100);
-    gfx->print(fuelSOCStr);
-
 
     Serial.print("Current: ");
     Serial.print(ma);
@@ -322,6 +338,7 @@ void loop()
     snprintf(fuelPStr, sizeof(fuelPStr), "Power: %d mW", pwr);
     gfx->setCursor(20, 140);
     gfx->print(fuelPStr);
+#endif 
   }
 
   // General timeout
