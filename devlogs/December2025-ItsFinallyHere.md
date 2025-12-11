@@ -1,3 +1,27 @@
+# December 10 2025 - Wednesday 10:00 PM
+Received my new display in the mail today! Validated my touchscreen I2C circuit
+works! A wonderful step. The display came with an FPC connector, I am scheming
+on modifying my current board to use the new one, but flipped, to accept my new
+display in a cleaner way without compromising the FPC...
+
+Experiment failed haha. It's okay, this board will still help me to verify the
+rest of my circuit designs:
+I2C:
+* Magnetometer
+* Ambient Light + UV Sensor
+* RTC
+I2S:
+* Speaker driver
+* Microphone
+External Drivers:
+* Vibration Motor
+* Flashlight
+
+For now the new board design is looking promising. I've laid out some more
+components, and I think I can significantly reduce the board footprint, to
+allow for the battery to sit on the same plane as the PCB, further reducing
+watch thickness!
+
 # December  8 2025 - Monday 11:28 PM
 Huge cleanup of git tracking.
 
