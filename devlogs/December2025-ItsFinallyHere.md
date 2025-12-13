@@ -1,3 +1,13 @@
+# December 13 2025 - Saturday  5:48 PM
+Finished V2 of the board, back on EasyEDA. I realised using KiCAD was too much
+effort for the too little amount of changes I needed to make. Tested the rest
+of the components and everything is working as expected except for the motor
+and the microphone. Speaker, SD card, flashlight and heartrate breakout are all
+good!
+
+Looking forward to final checks on V2 and ordering it! Also very happy the hand
+assembly using hot air on the bottom worked quite well!
+
 # December 10 2025 - Wednesday 10:00 PM
 Received my new display in the mail today! Validated my touchscreen I2C circuit
 works! A wonderful step. The display came with an FPC connector, I am scheming

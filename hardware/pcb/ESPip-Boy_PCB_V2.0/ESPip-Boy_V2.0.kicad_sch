@@ -4747,6 +4747,104 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "1_custom_sym_lib:200_mah_lipo"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "200_mah_lipo_1_1"
+				(rectangle
+					(start -1.27 1.27)
+					(end 5.08 -6.35)
+					(stroke
+						(width 0)
+						(type solid)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin power_out line
+					(at 5.08 -1.27 0)
+					(length 2.54)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "BAT+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 5.08 -3.81 0)
+					(length 2.54)
+					(name "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "BAT-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "BAT+"
 			(power)
 			(pin_numbers
@@ -19529,7 +19627,7 @@
 	)
 	(text "NF"
 		(exclude_from_sim no)
-		(at 183.134 100.33 0)
+		(at 182.88 90.17 0)
 		(effects
 			(font
 				(size 5.7912 5.7912)
@@ -19595,7 +19693,7 @@
 	)
 	(text "*Consider changing ISET \nfor 200mAh battery*"
 		(exclude_from_sim no)
-		(at 266.954 89.154 0)
+		(at 258.318 59.944 0)
 		(effects
 			(font
 				(size 6.2738 6.2738)
@@ -20085,7 +20183,7 @@
 	)
 	(text "Reset Button"
 		(exclude_from_sim no)
-		(at 134.62 124.1044 0)
+		(at 137.16 123.19 0)
 		(effects
 			(font
 				(size 2.8956 2.8956)
@@ -20435,6 +20533,12 @@
 		(uuid "8da2e229-9b28-428e-9ff0-e3813053e4c6")
 	)
 	(junction
+		(at 304.8 163.83)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "8ffff490-d5ff-4980-875e-54c13b00a005")
+	)
+	(junction
 		(at 284.48 354.33)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -20445,6 +20549,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "941e4abb-2b9d-4fba-890c-a83f27504d1f")
+	)
+	(junction
+		(at 304.8 148.59)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a2f950c6-2c74-4cb8-a973-c3a3f4c23f3f")
 	)
 	(junction
 		(at 69.85 374.65)
@@ -20988,6 +21098,16 @@
 	)
 	(wire
 		(pts
+			(xy 294.64 157.48) (xy 297.18 157.48)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "08270b0f-0535-488d-8d65-af169f8bae1b")
+	)
+	(wire
+		(pts
 			(xy 304.8 201.93) (xy 309.88 201.93)
 		)
 		(stroke
@@ -21105,6 +21225,16 @@
 			(type default)
 		)
 		(uuid "0ed601aa-64f7-48eb-bc64-1b5390692a5b")
+	)
+	(wire
+		(pts
+			(xy 294.64 154.94) (xy 297.18 154.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1072ab27-3e93-4e43-b7f8-82a6ddf6ec5a")
 	)
 	(wire
 		(pts
@@ -21935,6 +22065,16 @@
 			(type default)
 		)
 		(uuid "4a6cd604-a0a2-4228-8c67-5e7a0aa1b5bd")
+	)
+	(wire
+		(pts
+			(xy 297.18 148.59) (xy 304.8 148.59)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4a9407c2-aa40-461c-860b-d2006f43afda")
 	)
 	(wire
 		(pts
@@ -23128,6 +23268,16 @@
 	)
 	(wire
 		(pts
+			(xy 297.18 148.59) (xy 297.18 154.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9437e0c7-802f-46e3-b5d4-15e70aab62d6")
+	)
+	(wire
+		(pts
 			(xy 195.58 194.31) (xy 199.39 194.31)
 		)
 		(stroke
@@ -23135,6 +23285,16 @@
 			(type default)
 		)
 		(uuid "945cb035-edbf-4735-9fe6-3212f2fc0047")
+	)
+	(wire
+		(pts
+			(xy 297.18 157.48) (xy 297.18 163.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "949600a8-180f-488e-8e84-e9394ecdda24")
 	)
 	(wire
 		(pts
@@ -23675,6 +23835,16 @@
 			(type default)
 		)
 		(uuid "b1621150-011b-41f3-a4be-55ec7996b954")
+	)
+	(wire
+		(pts
+			(xy 297.18 163.83) (xy 304.8 163.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b19a7dbd-ec11-4049-be11-089dc7768d6d")
 	)
 	(wire
 		(pts
@@ -36043,6 +36213,76 @@
 			(project ""
 				(path "/a0672f88-4530-421b-ba73-6da91a940693"
 					(reference "R13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "1_custom_sym_lib:200_mah_lipo")
+		(at 287.02 153.67 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "79f4526b-2eec-403c-8ce5-bdfb2f0e00fe")
+		(property "Reference" "U6"
+			(at 295.91 154.9399 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "~"
+			(at 295.91 157.4799 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "1_custom_fp_lib:200_mah_lipo"
+			(at 287.02 153.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 287.02 153.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 287.02 153.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "BAT+"
+			(uuid "4a45aedf-55a2-4e31-8f24-829e6680f5e8")
+		)
+		(pin "BAT-"
+			(uuid "60835f59-1740-4628-839a-4efa66c036da")
+		)
+		(instances
+			(project ""
+				(path "/a0672f88-4530-421b-ba73-6da91a940693"
+					(reference "U6")
 					(unit 1)
 				)
 			)
