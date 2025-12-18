@@ -1,3 +1,25 @@
+# December 17 2025 - Wednesday  9:25 PM
+Today I reviewed my PCB for any flaws like via in traces or pads too close to
+each other. I found nothing so far, I think one more review session and I will
+be ready to order.
+
+I also checked the rest of my so far untested circuits. This was just the rest
+of my I2C devices which I already new somewhat worked due to responding to my
+I2C scan. The RTC, magnetometer and light sensor all respond to my commands. So
+far on the RTC makes sense though, but that's to be expected. The magnetometer
+and light sensor will no doubt need some actual software for calibration.
+
+I also found for the RTC that other brands like EPSON make a RTC with code
+8010, which made me discover my YSN8010 is a drop-in clone for these devices.
+I will try a library for the EPSON device soon, as the RTC is quite annoying to
+use. The time components are binary coded decimal within the device, and
+although it's fun to do some bit flipping, it would be even more fun to drop
+a library into my project. I got the hours, seconds and minutes working, so if
+I can't get a library I can roll my own.
+
+I'm looking forward to another check over of the PCB and firing away on the
+order button!
+
 # December 13 2025 - Saturday  5:48 PM
 Finished V2 of the board, back on EasyEDA. I realised using KiCAD was too much
 effort for the too little amount of changes I needed to make. Tested the rest
