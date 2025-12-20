@@ -1,3 +1,6 @@
+# December 19 2025 - Friday 10:26 PM
+PCB Rev2 on the way!
+
 # December 17 2025 - Wednesday  9:25 PM
 Today I reviewed my PCB for any flaws like via in traces or pads too close to
 each other. I found nothing so far, I think one more review session and I will
