@@ -1,8 +1,0 @@
-* move display connector to remove all tension/compression on display flex connector
-* make space on top of pcb for battery - move components around
-* switch from smd mounts to holes for vibration/speaker -> more secure
-*
-* use right angle LEDs instead of discrete if you can find them
-* 
-* PRINT OUT PCB before manufacturing to physically check footprints against
-* components!

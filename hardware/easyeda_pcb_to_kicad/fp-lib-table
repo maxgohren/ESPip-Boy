@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "espip_boy_rev2")(type "KiCad")(uri "$(KIPRJMOD)/espip_boy_rev2.pretty")(options "")(descr ""))
+)
