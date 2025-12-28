@@ -39094,7 +39094,7 @@
 	(symbol
 		(lib_id "TS24CA 250GF 013")
 		(at 138.43 144.78 0)
-		(unit 0)
+		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -39120,7 +39120,7 @@
 				(justify left top)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "easyeda2kicad:SW-SMD_L4.7-W3.5-P3.35-EH"
 			(at 138.43 144.78 0)
 			(effects
 				(font
@@ -39199,7 +39199,7 @@
 			(project ""
 				(path "/b3258cd7-0bc0-483d-8fcd-4f864f109cc4"
 					(reference "SW1")
-					(unit 0)
+					(unit 1)
 				)
 			)
 		)
@@ -40145,7 +40145,7 @@
 				(justify left top)
 			)
 		)
-		(property "Footprint" "Package_DFN_QFN:QFN-28-1EP_5x5mm_P0.5mm_EP2.7x2.7mm"
+		(property "Footprint" "Package_DFN_QFN:QFN-28-1EP_5x5mm_P0.5mm_EP3.35x3.35mm_ThermalVias"
 			(at 205.74 83.82 0)
 			(effects
 				(font
@@ -40509,7 +40509,7 @@
 	(symbol
 		(lib_id "XL-1005UBC_C22355736")
 		(at 320.04 80.01 0)
-		(unit 0)
+		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -40536,7 +40536,7 @@
 				(justify left top)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "LED_SMD:LED_0402_1005Metric"
 			(at 320.04 80.01 0)
 			(effects
 				(font
@@ -40609,7 +40609,7 @@
 			(project ""
 				(path "/b3258cd7-0bc0-483d-8fcd-4f864f109cc4"
 					(reference "U3")
-					(unit 0)
+					(unit 1)
 				)
 			)
 		)
@@ -50449,7 +50449,7 @@
 	(symbol
 		(lib_id "TZ-P2-0402YGTIA1-0.45T")
 		(at 320.04 85.09 0)
-		(unit 0)
+		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -50476,7 +50476,7 @@
 				(hide yes)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "LED_SMD:LED_0402_1005Metric"
 			(at 320.04 85.09 0)
 			(effects
 				(font
@@ -50549,7 +50549,7 @@
 			(project ""
 				(path "/b3258cd7-0bc0-483d-8fcd-4f864f109cc4"
 					(reference "LED1")
-					(unit 0)
+					(unit 1)
 				)
 			)
 		)

@@ -503,7 +503,7 @@
       "plot": "",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "espip_boy_rev2.step",
       "svg": "",
       "vrml": ""
     },
