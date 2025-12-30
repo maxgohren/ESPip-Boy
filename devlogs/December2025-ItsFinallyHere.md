@@ -1,3 +1,10 @@
+# December 29 2025 - Monday 10:21 PM
+PCB REV2 ASSEMBLED! It works! It's alive!
+
+Touchscreen works great and the display cable is not folded into any sharp
+corners. Only smooth bends. I'm so excited! Now I just need to finish my case
+and I am all done!
+
 # December 19 2025 - Friday 10:26 PM
 PCB Rev2 on the way!
 

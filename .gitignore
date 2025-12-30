@@ -21,6 +21,7 @@ wifi_config.h
 fp-info-cache
 *.kicad_prl
 *.zip
+fp-lib-table
 
 # FreeCAD Project Files to Ignore
 *.FCStd.lock
