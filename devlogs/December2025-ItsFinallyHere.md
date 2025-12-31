@@ -1,3 +1,26 @@
+# December 30 2025 - Tuesday  9:47 PM
+Today I spent HOURS trying to get my case complete. Between the fillet and thickness 
+tool on FreeCAD being very picky and the PCB import being very laggy it was
+grueling and arduous process that I still have not completed. I think I will do
+a mockup tomorrow to find the correct order to do my components.
+
+For example, I first made a filleted pad and then made holes in it. I was
+unable to make a thickness into this structure.
+
+Then, I double back and use the Set Tip feature to add a thickness before I add
+my pockets. This then resulted in my pockets not being through holes but actually holes with their bottoms sealed up. Very bizarre. 
+
+Next I will try:
+Main body pad -> thickness -> component pockets -> fillet -> watch connectors
+-> split case in half -> add top/bottom half connections
+
+I will do a quick run through these will 1 step per each (instead of doing all
+the actually required holes) so that I know they work.
+
+One thing I really need is to make the thickness inside the case, and then add
+new pads to extrude the watch connectors from, without them being deleted from
+the thickness operation.
+
 # December 29 2025 - Monday 10:21 PM
 PCB REV2 ASSEMBLED! It works! It's alive!
 
