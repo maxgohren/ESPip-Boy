@@ -1,3 +1,15 @@
+# December 31 2025 - Wednesday  5:45 PM
+Another tough day working with FreeCAD to get complete my case. Today
+I actually sent in a .stl to get printed, but as I sent it in I noticed my
+hastily designed screw terminals completely block my PCB from actually fitting
+into the case!
+
+That's what you get for throwing things together on the fly on New Year's Eve!
+
+It's been a great 2025, and I am so proud of myself for embarking on this
+journey and learning all these amazing skills. I look forward to what insane
+projects I get up to next year!
+
 # December 30 2025 - Tuesday  9:47 PM
 Today I spent HOURS trying to get my case complete. Between the fillet and thickness 
 tool on FreeCAD being very picky and the PCB import being very laggy it was
