@@ -10,6 +10,7 @@
 #include "sleep.h"
 #include "fuel.h"
 #include "loading_screen.h"
+#include "rtc.h"
 
 // IMU Setup
 BMI270 imu;
@@ -22,6 +23,9 @@ unsigned long lastIMUReading = 0;
 
 // ----- Fuel Gauge -----
 BQ27421 fuelGauge;
+
+// ----- RTC ------
+RTC rtc;
 
 // ----- Display Setup -----
 Arduino_DataBus *bus = new Arduino_ESP32SPI(LCD_DC, LCD_CS, LCD_SCK, LCD_MOSI);
@@ -60,46 +64,72 @@ void imuInterruptHandler()
     imuInterruptOccurred = true;
 }
 
+int readRTC(byte reg){
+  Wire.beginTransmission(0x32);
+  Wire.write(reg);
+  Wire.endTransmission();
+
+  Wire.requestFrom(RTC_ADDR, 1);
+  //while (Wire.available() == 0);
+  return Wire.read();
+}
+
 void setup(void)
 {
   Serial.begin(115200);
-  Serial.println("Arduino_GFX Clock example");
-  Serial.println(__TIME__);
+  Serial.println("ESPip-Boy init begin:");
+  Wire.begin(IIC_SDA, IIC_SCL);
 
   // Backlight control
   display_bl_setup();
   display_screen_on();
 
+  // Time init
+  Serial.printf("ESPip-Boy %s begin.\n", "time");
+  targetTime = ((millis() / 1000) + 1) * 1000;
+  //struct tm tm;
+  //time_t t = mktime(&tm);
+  //struct timeval now = { .tv_sec = t };
+  //settimeofday(&now, NULL);
+  Serial.printf("ESPip-Boy %s complete.\n", "time");
+
+  Serial.printf("ESPip-Boy %s begin.\n", "rtc");
+  RTCDateTime rtc_time; 
+  //rtc.init();
+  // If first boot, set time  WiFi (TODO: compile flags). Else get time from RTC
+  // TODO move to clock.h, pass in Wire handle
+  if(get_boot_count() == 0){
+     wifi_set_system_time(&Serial);
+     //get_rtc_time_from_compile_time(__DATE__, __TIME__, &rtc_time);
+    time_t now; 
+    struct tm t;
+    time(&now);
+    localtime_r(&now, &t);
+
+    rtc.setTime({ (uint8_t)t.tm_sec, (uint8_t)t.tm_min, (uint8_t)t.tm_hour });
+    Serial.printf("Setting rtc time to %d:%d:%d\n", t.tm_hour, t.tm_min, t.tm_sec);
+  } else {
+    rtc_time = rtc.getTime();
+
+    Serial.println("RTC Time: ");
+    Serial.print(rtc_time.hours);
+    Serial.print(":");
+    Serial.print(rtc_time.minutes);
+    Serial.print(":");
+    Serial.println(rtc_time.seconds);
+    Serial.printf("ESip-Boy %s complete.\n", "rtc");
+  }
+
   // Init Display
+  Serial.printf("ESPip-Boy %s begin:\n", "gfx->begin()"); 
   if (!gfx->begin())
   {
     Serial.println("gfx->begin() failed!");
   }
-  gfx->fillScreen(BACKGROUND);
-  gfx->draw16bitRGBBitmap(gfx->width() / 2 - IMG_WIDTH / 2 , 
-                          gfx->height() / 2 - IMG_HEIGHT /2, 
-                          (const uint16_t*)vault_boy_pip_boy_color, 
-                          IMG_HEIGHT, 
-                          IMG_WIDTH);
-  Serial.printf("Finished drawing loading screen: w: %d, h: %d\n", gfx->width(), gfx->height());
-
-  gfx->setTextColor(RGB565_WHITE, RGB565_BLACK);
-  int textSize = gfx->width() / 94;
-  gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
-  gfx->setCursor(20, 50); // Centered above pip
-  gfx->print("Loading ESPip-Boy");
+  Serial.printf("ESPip-Boy %s complete.", "gfx->begin()"); 
 
 
-  // Set up time variables
-  hh = conv2d(__TIME__);
-  mm = conv2d(__TIME__ + 3);
-  ss = conv2d(__TIME__ + 6);
-  targetTime = ((millis() / 1000) + 1) * 1000;
-  setClock(&Serial);
-
-  Serial.println("ESPip-Boy init complete.");
-
-  Wire.begin(IIC_SDA, IIC_SCL);
+  Serial.println("Starting to init I2C.");
   // Init IMU
   while(imu.beginI2C(i2cAddress) != BMI2_OK)
   {
@@ -112,26 +142,23 @@ void setup(void)
       }
       Serial.println("BMI270 not initialized, must press button to turn screen on");
   }
-  Serial.println("BMI270 connected!");
 
-  // Reconcile with BMI270 init
+  // Setup fuel gauge
   fuelGauge.begin(4, 16);
-  
-  // Wrist Wake Up -> poor performance
-  //imu.enableFeature(BMI2_WRIST_WEAR_WAKE_UP);
-  //imu.mapInterruptToPin(BMI2_WRIST_WEAR_WAKE_UP_INT, BMI2_INT1);
 
-  // Any motion -> way easier to tune
-  imu.enableFeature(BMI2_ANY_MOTION);
-  bmi2_sens_config anyMotionConfig;
-  anyMotionConfig.type = BMI2_ANY_MOTION;
-  anyMotionConfig.cfg.any_motion.duration = 2;
-  anyMotionConfig.cfg.any_motion.threshold = 1100;
-  anyMotionConfig.cfg.any_motion.select_x = BMI2_ENABLE;
-  anyMotionConfig.cfg.any_motion.select_y = BMI2_ENABLE;
-  anyMotionConfig.cfg.any_motion.select_z = BMI2_ENABLE;
-  imu.setConfig(anyMotionConfig);
-  imu.mapInterruptToPin(BMI2_ANY_MOTION_INT, BMI2_INT1);
+  imu.enableFeature(BMI2_WRIST_WEAR_WAKE_UP);
+  imu.mapInterruptToPin(BMI2_WRIST_WEAR_WAKE_UP_INT, BMI2_INT1);
+
+  // Wrist Wakeup Feature Enable & Config
+  bmi2_sens_config wristWakeUpConfig;
+  wristWakeUpConfig.type = BMI2_WRIST_WEAR_WAKE_UP;
+  wristWakeUpConfig.cfg.wrist_wear_wake_up.min_angle_focus = 1024;
+  wristWakeUpConfig.cfg.wrist_wear_wake_up.min_angle_nonfocus = 1448;
+  wristWakeUpConfig.cfg.wrist_wear_wake_up.max_tilt_lr = 1024;
+  wristWakeUpConfig.cfg.wrist_wear_wake_up.max_tilt_ll = 700;
+  wristWakeUpConfig.cfg.wrist_wear_wake_up.max_tilt_pd = 179;
+  wristWakeUpConfig.cfg.wrist_wear_wake_up.max_tilt_pu = 1774;
+  imu.setConfig(wristWakeUpConfig);
 
   // IMU Interrupt Setup
   bmi2_int_pin_config intPinConfig;
@@ -143,11 +170,22 @@ void setup(void)
   intPinConfig.pin_cfg[0].input_en = BMI2_INT_INPUT_DISABLE;
   imu.setInterruptPinConfig(intPinConfig);
   attachInterrupt(digitalPinToInterrupt(IMU_INT), imuInterruptHandler, RISING);
+  Serial.println("I2C init complete.");
 
+  // Sleep
   init_sleep_mode(&Serial);
 
   // Clear screen after loading
   gfx->fillScreen(BACKGROUND); 
+
+  // TODO fade lcd backlight in
+  //ledcAttach(LCD_BL, pwmFreq, pwmResolution);
+  //pinMode(0, INPUT_PULLUP);
+  pinMode(LED_PIN, OUTPUT);
+  //ledcAttach(LED_PIN, pwmFreq, pwmResolution);
+  Serial.println("Flashlight init complete.");
+
+  Serial.println("ESPip-Boy init complete.");
 }
 
 bool isWatchFacing(float x, float y, float z) {
@@ -183,6 +221,7 @@ void loop()
     */
   }
 
+
   if(imuInterruptOccurred)
   {
       // Reset flag and get status
@@ -205,8 +244,6 @@ void loop()
           lastWakeTime = millis();
           lastFacingTime = millis();
       }
-
-
   }
 
   // Screen off if watch is out of face up position
@@ -216,27 +253,22 @@ void loop()
       lastFacingTime = millis();
     }
 
-    // Timeout display when out of focus
-    /*
     currTime = millis();
-    const int screen_focus_timeout_ms = 2000;
+    const int screen_focus_timeout_ms = 10000;
     if (currTime - lastFacingTime > screen_focus_timeout_ms) {
-      Serial.printf("Screen has been out of focus for more than %d ms, turning off\n", screen_focus_timeout_ms);
-      //display_screen_off();
-      //go_sleep();
+      Serial.printf("Screen has been out of focus for more than %d sec, turning off\n\n", screen_focus_timeout_ms / 1000);
+      display_screen_off();
+      go_sleep();
     }
-    */
 
-  } 
-
-  if (!screenOn) {
+  } else {
     if (isWatchFacing(x, y, z)){
       display_screen_on();
     }
   }
 
-  if (currTime >= targetTime)
-  {
+  if (currTime >= targetTime){
+  
     targetTime += 1000;
     ss++; // Advance second
     if (ss == 60)
@@ -303,16 +335,16 @@ void loop()
     gfx->setTextColor(RGB565_WHITE, RGB565_BLACK);
     gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
 
-    Serial.print("SOC: ");
-    Serial.print(soc);
-    Serial.println(" %");
-    char fuelSOCStr[100];
-    snprintf(fuelSOCStr, sizeof(fuelSOCStr), "BAT: [%d%]", soc);
+    //Serial.print("SOC: ");
+    //Serial.print(soc);
+    //Serial.println(" %");
+    static char fuelSOCStr[100];
+    snprintf(fuelSOCStr, sizeof(fuelSOCStr), "BAT: [%d %]", soc);
     gfx->setCursor(20, 180);
     gfx->print(fuelSOCStr);
-
-
 #if 0
+
+
     Serial.print("Voltage: ");
     Serial.print(v);
     Serial.println(" mV");
@@ -340,15 +372,4 @@ void loop()
     gfx->print(fuelPStr);
 #endif 
   }
-
-  // General timeout
-  /*
-  const int screen_timeout_ms = 10000;
-  if (currTime - lastWakeTime > screen_timeout_ms) {
-    Serial.printf("Watch has been on for more than %d s, turning off\n", screen_timeout_ms / 1000);
-    lastWakeTime = currTime;
-    //display_screen_off();
-    //go_sleep();
-  }
-  */
 }

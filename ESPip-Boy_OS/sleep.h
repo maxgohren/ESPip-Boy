@@ -1,4 +1,5 @@
 #include "driver/rtc_io.h"
+#include "pinout.h"
 
 // ----- Deep Sleep -----
 #define BUTTON_PIN_BITMASK(GPIO) (1ULL << GPIO) // 2 ^ GPIO in hex
@@ -22,6 +23,13 @@ void print_wakeup_reason() {
   }
 }
 
+// TODO bool user_active = false;
+// set user active when turning things on like flashlight, touchscreen buttons
+// etc. this will delay
+//
+int get_boot_count(){
+  return bootCount;
+}
 
 void init_sleep_mode(Stream *S)
 {
@@ -39,6 +47,12 @@ void init_sleep_mode(Stream *S)
 
 void go_sleep()
 {
+  // TODO if(!user_active)
   esp_deep_sleep_start();
+  
+  // TODO
+  // low power mag
+  // low power display
+  // low power other periphs
 }
 

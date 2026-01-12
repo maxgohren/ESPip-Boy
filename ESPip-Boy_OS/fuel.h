@@ -60,7 +60,7 @@ public:
         Wire.endTransmission();
     }
 
-  void configureBattery_400mAh() {
+  void configureBattery() {
       // Unseal (0x8000 key twice)
       writeControlWord(0x8000);
       writeControlWord(0x8000);
@@ -71,8 +71,8 @@ public:
       delay(50);
 
       // Set parameters (Design Capacity / Energy / Termination voltage)
-      writeDM(0x52, 10, 400);     // Design Capacity (mAh)
-      writeDM(0x52, 12, 1480);    // Design Energy (mWh) = 3.7V * 400mAh ≈ 1480
+      writeDM(0x52, 10, 200);     // Design Capacity (mAh)
+      writeDM(0x52, 12, 740);    // Design Energy (mWh) = 3.7V * 200mAh ≈ 740
       writeDM(0x52, 16, 3000);    // Terminate Voltage (mV)
 
       delay(10);

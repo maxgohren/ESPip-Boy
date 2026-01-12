@@ -2,27 +2,82 @@
 
 #define RTC_ADDR 0x32
 
-int readRTC(byte reg){
-  Wire.beginTransmission(RTC_ADDR);
-  Wire.write(reg);
-  Wire.endTransmission();
+struct RTCDateTime {
+  uint8_t seconds;
+  uint8_t minutes;
+  uint8_t hours;
+};
 
-  Wire.requestFrom(RTC_ADDR, 1);
-  while (Wire.available() == 0);
-  return Wire.read();
+uint8_t bcd_to_dec(uint8_t bcd){
+  return (bcd & 0x0F) + (bcd >> 4) * 10;
 }
 
-
-int writeRTC(byte reg){
-  Wire.beginTransmission(RTC_ADDR);
-  Wire.write(reg);
-  Wire.endTransmission();
-
-  Wire.requestFrom(RTC_ADDR, 1);
-  while (Wire.available() == 0);
-  return Wire.read();
+uint8_t dec_to_bcd(uint8_t dec){
+  return (dec / 10) << 4 | (dec & 0x0F);
 }
 
+class RTC {
+public:
+
+  void init(){
+    Wire.beginTransmission(RTC_ADDR);
+    Wire.write(0x00);
+    Wire.write(0x00);
+    Wire.endTransmission();
+    Serial.println("RTC Initialized!");
+  }
+  
+  RTCDateTime getTime(){
+    // first four bits are binary coded decimal 0-9
+    // next 3 bits are binary coded decimal 0-5
+    RTCDateTime rtc_time;
+
+    uint8_t second = readRTC(0x00);
+    uint8_t minute = readRTC(0x01);
+    uint8_t hour = readRTC(0x02);
+    rtc_time.seconds = bcd_to_dec(second); 
+    rtc_time.minutes = bcd_to_dec(minute); 
+    rtc_time.hours = bcd_to_dec(hour); 
+
+    return rtc_time;
+  }
+
+  void setTime(RTCDateTime rtc_time){
+    // first four bits are binary coded decimal 0-9
+    writeRTC(0x00, dec_to_bcd(rtc_time.seconds)); 
+    writeRTC(0x01, dec_to_bcd(rtc_time.minutes));
+    writeRTC(0x02, dec_to_bcd(rtc_time.hours));
+  }
+
+  float getTemp(){
+    float temp = readRTC(0x17);
+    return ((temp * 2 - 187.19) / 3.218);
+  }
+
+  int getVendorID() {
+    return readRTC(0x20) >> 4;
+  }
+
+private:
+  uint8_t readRTC(byte reg){
+    Wire.beginTransmission(RTC_ADDR);
+    Wire.write(reg);
+    Wire.endTransmission();
+
+    Wire.requestFrom(RTC_ADDR, 1);
+    //while (Wire.available() == 0);
+    return Wire.read();
+  }
+
+  void writeRTC(byte reg, byte value){
+    Wire.beginTransmission(RTC_ADDR);
+    Wire.write(reg);
+    Wire.write(value);
+    Wire.endTransmission();
+  }
+};
+
+#if 0
 void setup(){
   Serial.begin(115200);
   Serial.println("Hello from ESP32!");
@@ -70,3 +125,4 @@ void loop(){
 
   delay(1000); // Wait for the next second
 }
+#endif
