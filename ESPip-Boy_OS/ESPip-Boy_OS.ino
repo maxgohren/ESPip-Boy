@@ -83,6 +83,8 @@ void setup(void)
   // Backlight control
   display_bl_setup();
   display_screen_off();
+  //gfx->fillScreen(BACKGROUND);
+
 
   // Time init
   Serial.printf("ESPip-Boy %s begin.\n", "time");
@@ -252,7 +254,7 @@ void loop()
     }
 
     currTime = millis();
-    const int screen_focus_timeout_ms = 10000;
+    const int screen_focus_timeout_ms = 2000;
     if (currTime - lastFacingTime > screen_focus_timeout_ms) {
       Serial.printf("Screen has been out of focus for more than %d sec, turning off\n\n", screen_focus_timeout_ms / 1000);
       display_screen_off();
@@ -340,26 +342,25 @@ void loop()
     snprintf(fuelSOCStr, sizeof(fuelSOCStr), "BAT: [%d %]", soc);
     gfx->setCursor(20, 180);
     gfx->print(fuelSOCStr);
-#if 0
 
-
-    Serial.print("Voltage: ");
-    Serial.print(v);
-    Serial.println(" mV");
+    //Serial.print("Voltage: ");
+    //Serial.print(v);
+    //Serial.println(" mV");
     char fuelVStr[100];
     snprintf(fuelVStr, sizeof(fuelVStr), "Voltage: %d mV", v);
-    int textSize = gfx->width() / 120;
+    textSize = gfx->width() / 120;
     gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
-    gfx->setCursor(20, 80);
+    gfx->setCursor(20, 200);
     gfx->print(fuelVStr);
 
-    Serial.print("Current: ");
-    Serial.print(ma);
-    Serial.println(" mA");
+    //Serial.print("Current: ");
+    //Serial.print(ma);
+    //Serial.println(" mA");
     char fuelAStr[100];
     snprintf(fuelAStr, sizeof(fuelAStr), "Current: %d mA", ma);
-    gfx->setCursor(20, 120);
+    gfx->setCursor(20, 220);
     gfx->print(fuelAStr);
+#if 0
 
     Serial.print("Power: ");
     Serial.print(ma);
