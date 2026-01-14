@@ -82,7 +82,7 @@ void setup(void)
 
   // Backlight control
   display_bl_setup();
-  display_screen_on();
+  display_screen_off();
 
   // Time init
   Serial.printf("ESPip-Boy %s begin.\n", "time");
@@ -145,6 +145,7 @@ void setup(void)
 
   // Setup fuel gauge
   fuelGauge.begin(4, 16);
+  //fuelGauge.configureBattery(); Only really needs to be done once
 
   imu.enableFeature(BMI2_WRIST_WEAR_WAKE_UP);
   imu.mapInterruptToPin(BMI2_WRIST_WEAR_WAKE_UP_INT, BMI2_INT1);
@@ -174,9 +175,6 @@ void setup(void)
 
   // Sleep
   init_sleep_mode(&Serial);
-
-  // Clear screen after loading
-  gfx->fillScreen(BACKGROUND); 
 
   // TODO fade lcd backlight in
   //ledcAttach(LCD_BL, pwmFreq, pwmResolution);

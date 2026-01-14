@@ -47,12 +47,19 @@ void init_sleep_mode(Stream *S)
 
 void go_sleep()
 {
-  // TODO if(!user_active)
-  esp_deep_sleep_start();
-  
+  // TODO if(!user_active){
   // TODO
+  // esp32 peripherals: 
+  // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH,   ESP_PD_OPTION_OFF);
+  // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
+  // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
+  // esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL,         ESP_PD_OPTION_OFF);
+  //
   // low power mag
   // low power display
   // low power other periphs
+    esp_deep_sleep_start();
+//}
+  
 }
 

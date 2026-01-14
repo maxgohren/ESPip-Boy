@@ -71,9 +71,9 @@ public:
       delay(50);
 
       // Set parameters (Design Capacity / Energy / Termination voltage)
-      writeDM(0x52, 10, 200);     // Design Capacity (mAh)
+      writeDM(0x52, 10, 200);    // Design Capacity (mAh)
       writeDM(0x52, 12, 740);    // Design Energy (mWh) = 3.7V * 200mAh ≈ 740
-      writeDM(0x52, 16, 3000);    // Terminate Voltage (mV)
+      writeDM(0x52, 16, 3000);   // Terminate Voltage (mV)
 
       delay(10);
 
