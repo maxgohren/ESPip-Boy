@@ -4,6 +4,7 @@
 
 #include <Arduino_GFX_Library.h>
 #include "flash.h"
+#include "imu.h"
 
 #define BACKGROUND RGB565_BLACK
 
@@ -76,7 +77,7 @@ void draw_termiwatch()
 
     /* TEMP */
     snprintf(textLine, sizeof(textLine), "[TEMP] %.1f C", rtc.getTemp());
-    gfx->setTextColor(RGB565_THISTLE, RGB565_BLACK);
+    gfx->setTextColor(RGB565_YELLOW, RGB565_BLACK);
     gfx->setCursor(hpos, vpos);
     gfx->print(textLine);
     vpos += gap;

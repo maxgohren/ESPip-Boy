@@ -69,7 +69,6 @@ public:
 
   void setTime(struct tm rtc_time)
   {
-    /*
     Serial.printf(
       "W: tm_sec=%d tm_min=%d tm_hour=%d tm_mday=%d tm_mon=%d tm_year=%d tm_wday=%d tm_yday=%d tm_isdst=%d\n",
       rtc_time.tm_sec,
@@ -82,7 +81,6 @@ public:
       rtc_time.tm_yday,
       rtc_time.tm_isdst
     );
-    */
 
     writeRTC(SEC,  dec_to_bcd(rtc_time.tm_sec));
     writeRTC(MIN,  dec_to_bcd(rtc_time.tm_min));
@@ -93,7 +91,6 @@ public:
     writeRTC(YEAR, dec_to_bcd(rtc_time.tm_year));
     writeRTC(YDAY, dec_to_bcd(rtc_time.tm_yday));
 
-    /*
     Serial.printf(
         "R: tm_sec=%d tm_min=%d tm_hour=%d tm_mday=%d tm_mon=%d tm_year=%d tm_wday=%d tm_yday=%d tm_isdst=%d\n",
       bcd_to_dec(readRTC(SEC)),
@@ -106,7 +103,6 @@ public:
       bcd_to_dec(readRTC(YDAY)),
       0);
       Serial.println();
-      */
   }
 
   float getTemp(){

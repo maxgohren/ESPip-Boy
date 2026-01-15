@@ -23,6 +23,8 @@ double z = 0;
 
 int getStepCount()
 {
+  // Should be only doing this in interrupt routine, but lazily poll it for now
+  imu.getStepCount(&step_count);
   return step_count;
 }
 

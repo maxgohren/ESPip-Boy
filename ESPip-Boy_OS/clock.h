@@ -3,37 +3,49 @@
 #include "rtc.h"
 #include "sleep.h"
 
-void wifi_set_system_time(Stream *Serial)
+const long gmtOffset_sec = -5 * 60 * 60; // -5 hours
+
+void wifi_set_system_time()
 {
-  // TODO make this an RTOS thread that runs once a day, specifically during
-  // night time hours when the watch is not being used
+  // Connect to Wifi 
   WiFi.begin(SSID_NAME, SSID_PASSWORD);
   while (WiFi.status() != WL_CONNECTED)
   {
-    Serial->print('.');
+    Serial.print('.');
     delay(500);
   }
-  configTime(0, 0, "time1.google.com", "pool.ntp.org");
+  
+  // Set domains to get time from
+  configTime(gmtOffset_sec, 0, "time1.google.com", "pool.ntp.org");
 
-  Serial->print("Waiting for NTP time sync: ");
+  // Wait 5 seconds for NTP time sync connection
   time_t nowSecs = time(nullptr);
-  while (nowSecs < 8 * 3600 * 2)
+  while (nowSecs < 10)
   {
     delay(500);
-    Serial->print(".");
+    Serial.print(".");
     yield();
+    // While waiting, we get current time since epoch in seconds
     nowSecs = time(nullptr);
   }
 
-  Serial->println();
+  // Set the time
   struct tm timeinfo;
-  gmtime_r(&nowSecs, &timeinfo);
-  Serial->print("Current time: ");
-  char buf[26];
-  Serial->println(asctime_r(&timeinfo, buf));
+  localtime_r(&nowSecs, &timeinfo); // Using time_t nowSecs (seconds since epoch), convert
+                                 // to UTC calendar time (struct tm) timeinfo
+  // This differs from localtime_r which converts to, you guessed it, local time (relies on tzset timezone)
 
+  // Update RTC time with updated WiFi sync'd time
+  rtc.setTime(timeinfo);
+
+  // Print 
+  char buf[26];
+  Serial.printf("WiFi:  localtime_r: %s\n", asctime_r(&timeinfo, buf));
+
+  // Turn off Wifi
   WiFi.disconnect();
   WiFi.mode(WIFI_OFF);
+
 }
 
 void init_clock()
@@ -42,7 +54,8 @@ void init_clock()
 
   // If first boot, set time from WiFi TODO do this every 24 hours?. Else get time from RTC
   if(get_boot_count() == 0){
-    wifi_set_system_time(&Serial);
+    wifi_set_system_time();
+    // TODO if wifi fails update from RTC
   } else {
     // TODO rtc.updateSystemTime(){
       // Get time from rtc into calendar struct
