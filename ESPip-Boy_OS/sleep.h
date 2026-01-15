@@ -1,5 +1,7 @@
+#pragma once
 #include "driver/rtc_io.h"
 #include "pinout.h"
+#include "display.h"
 
 // ----- Deep Sleep -----
 #define BUTTON_PIN_BITMASK(GPIO) (1ULL << GPIO) // 2 ^ GPIO in hex
@@ -45,6 +47,20 @@ void init_sleep_mode(Stream *S)
   rtc_gpio_pulldown_en(WAKEUP_GPIO);
 }
 
+void set_power_saving_mode(){
+
+  // TODO
+  //set_imu_low_power();
+  //set_mag_low_power();
+  //set_lux_low_power();
+  // USB UART power modes?
+  // fuel gauge power modes?
+  // battery charger power modes?
+
+  // shutdown speaker
+
+}
+
 void go_sleep()
 {
   // TODO if(!user_active){
@@ -54,11 +70,11 @@ void go_sleep()
   // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
   // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
   // esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL,         ESP_PD_OPTION_OFF);
+  //set_power_saving_mode();
   //
-  // low power mag
-  // low power display
-  // low power other periphs
-    esp_deep_sleep_start();
+  display_screen_off();
+  Serial.println("Going to deep sleep.");
+  esp_deep_sleep_start();
 //}
   
 }

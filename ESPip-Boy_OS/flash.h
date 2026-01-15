@@ -1,12 +1,16 @@
-
+#pragma once
 // LED settings
-/*
 const int pwmFreq = 5000;     // Hz
 const int pwmResolution = 8;  // bits (0–255)
+
 int io0 = LOW;
-int flashlight = 0;
+bool flashlight_on = false;
 int last_toggle_time = 0;
-// Fade in
+
+bool flash_on()
+{
+  return flashlight_on;
+}
 void led_fade_in() {
   for (int duty = 0; duty <= 255; duty++) {
     ledcWrite(LED_PIN, duty);
@@ -20,15 +24,23 @@ void led_fade_out() {
     delay(10);
   }
 }
-*/
 
-  // Flashlight thread
+void init_flashlight()
+{
+  pinMode(0, INPUT_PULLUP);
+  pinMode(LED_PIN, OUTPUT);
+  // digitalWrite no longer works if ledcAttach is called, must use ledcWrite()
+  //ledcAttach(LED_PIN, pwmFreq, pwmResolution);
+}
+
+void handle_flashlight()
+{
   io0 = digitalRead(0);
   if (io0 == 0 && millis() - 250 > last_toggle_time){
     last_toggle_time = millis();
-    Serial.println("Button pressed. Toggling flashlight.");
-    flashlight ^= HIGH; // toggle button
-    digitalWrite(LED_PIN, flashlight);
+    //Serial.println("Button pressed. Toggling flashlight.");
+    flashlight_on ^= HIGH; // toggle button
+    digitalWrite(LED_PIN, flashlight_on);
 
     // TODO fade flashlight in/out
     /*
@@ -39,3 +51,4 @@ void led_fade_out() {
     */
 
   }
+}

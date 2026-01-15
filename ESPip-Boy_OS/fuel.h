@@ -3,6 +3,7 @@
 
 #define BQ27421_ADDRESS 0x55
 
+
 class BQ27421 {
 public:
     void begin(int sda, int scl) {
@@ -100,3 +101,5 @@ private:
     }
 };
 
+// ----- Fuel Gauge -----
+BQ27421 fuelGauge;
