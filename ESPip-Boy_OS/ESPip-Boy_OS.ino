@@ -20,55 +20,16 @@ void setup(void)
   Serial.begin(115200);
   Wire.begin(IIC_SDA, IIC_SCL);
 
-  // Set timezone
-  //setenv("TZ", "EST-5", 1);
-  //tzset();
+  init_clock();
 
-  time_t now; 
-  struct tm t;
-  time(&now);
-  localtime_r(&now, &t);
-
-  // If first boot, set time from WiFi TODO do this every 24 hours?. Else get time from RTC
-  if(get_boot_count() == 0){
-    wifi_set_system_time(&Serial);
-    rtc.set({ (uint8_t)t.tm_sec, (uint8_t)t.tm_min, (uint8_t)t.tm_hour, (uint8_t)t.tm_wday, (uint8_t)t.tm_mday, (uint8_t)t.tm_mon, (uint8_t)t.tm_year});
-  } else {
-    /*
-    rtc_t rtc_time; 
-    rtc_time = rtc.get();
-
-    struct tm tm_time;
-    tm_time.tm_year = rtc_time.year - 1900; 
-    tm_time.tm_mon  = rtc_time.month - 1;
-    tm_time.tm_mday = rtc_time.day;
-    tm_time.tm_hour = rtc_time.hour;
-    tm_time.tm_min  = rtc_time.min;
-    tm_time.tm_sec  = rtc_time.sec;
-
-    tm_time.tm_isdst = -1; // let system determine DST
-
-    time_t epoch = mktime(&tm_time);
-
-    struct timeval tv;
-    tv.tv_sec = epoch;
-    tv.tv_usec = 0;
-
-    // Above code and RTC code is not correct, do not do this yet
-    // I'll live with the internal RTC drift for a few more days ahah
-    //settimeofday(&tv, NULL);
-    */
-  }
-
-  // Init Display and clear
+  // Init Display ui
   init_termiwatch();
 
   // Backlight control
   //ledcAttach(LCD_BL, pwmFreq, pwmResolution);
   display_bl_setup();
-  display_screen_on();
+  display_screen_off();
 
-  Serial.println("Starting to init I2C.");
   imu_init();
 
   // Setup fuel gauge
@@ -80,7 +41,6 @@ void setup(void)
 
   // Flashlight
   init_flashlight();
-  Serial.println("Flashlight init complete.");
 
   Serial.println("ESPip-Boy init complete.");
 }

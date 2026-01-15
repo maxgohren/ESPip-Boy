@@ -26,9 +26,6 @@ Arduino_GFX *gfx = new Arduino_ST7789(
 // ----- Touch Setup -----
 //CST816S touch(IIC_SDA, IIC_SCL, TP_RST, TP_INT);
 
-// clock
-const long gmtOffset_sec = -5 * 60 * 60; // EST is -5
-
 //void init_termiwatch(Arduino_GFX *gfx){
 void init_termiwatch(){
     if (!gfx->begin())
@@ -49,10 +46,10 @@ void draw_termiwatch()
     int gap = 25;
 
     // Digital clock logic
+    // TODO abstract into clock.h
     time_t now;
     time(&now);
-    now += gmtOffset_sec;
-    struct tm *tmLocal = localtime(&now);
+    struct tm *tmLocal = localtime(&now); // must have called rtc.init() to set TZ
 
     /* user@watch:~ $now */
     snprintf(textLine, sizeof(textLine), "max@watch:~ $ now");

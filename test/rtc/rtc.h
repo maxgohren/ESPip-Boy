@@ -43,10 +43,7 @@ class RTC {
 public:
 
   void init(){
-    // Set timezone for localtime_r() call
-    setenv("TZ", "EST5EDT", 1);
-    tzset();
-
+    Wire.begin(4, 16);
     Wire.beginTransmission(RTC_ADDR);
     Wire.write(0x00);
     Wire.write(0x00);
@@ -64,7 +61,6 @@ public:
     rtc_time->tm_year = bcd_to_dec(readRTC(YEAR)); 
     rtc_time->tm_wday = bin_to_weekday(readRTC(WDAY)); 
     rtc_time->tm_yday = bcd_to_dec(readRTC(YDAY));
-    rtc_time->tm_isdst = -1;
   }
 
   void setTime(struct tm rtc_time)

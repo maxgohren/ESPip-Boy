@@ -1,5 +1,7 @@
 #include <WiFi.h>
 #include "wifi_config.h"
+#include "rtc.h"
+#include "sleep.h"
 
 void wifi_set_system_time(Stream *Serial)
 {
@@ -32,4 +34,34 @@ void wifi_set_system_time(Stream *Serial)
 
   WiFi.disconnect();
   WiFi.mode(WIFI_OFF);
+}
+
+void init_clock()
+{
+  rtc.init();
+
+  // If first boot, set time from WiFi TODO do this every 24 hours?. Else get time from RTC
+  if(get_boot_count() == 0){
+    wifi_set_system_time(&Serial);
+  } else {
+    // TODO rtc.updateSystemTime(){
+      // Get time from rtc into calendar struct
+      struct tm tmLocal = {};
+      rtc.getTime(&tmLocal);
+
+      // Convert calendar struct to seconds since epoch
+      time_t seconds_since_epoch = mktime(&tmLocal);
+
+      // Convert time_t to timeval
+      struct timeval t;
+      t.tv_sec = seconds_since_epoch;
+      t.tv_usec = 0;
+      settimeofday(&t, NULL);
+      
+      // Verify time is set correctly
+      time_t now;
+      time(&now);
+      Serial.println(ctime(&now));
+  //}
+  }
 }
