@@ -40,7 +40,12 @@ void init_sleep_mode(Stream *S)
 
   print_wakeup_reason();
 
-  esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO, 1); // Trigger wakeup on HIGH from pin 2 (IMU_INT)
+  // Trigger wakeup on HIGH from pin 2 (IMU_INT)
+  // MUST SET UP IMU init first TODO couple wake/sleep together?
+  //esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO, 1); 
+
+  // Wakeup from touch screen goes low
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_33, 0);
   
   // Configure gpio to be pulled down
   rtc_gpio_pullup_dis(WAKEUP_GPIO);

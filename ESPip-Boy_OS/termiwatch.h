@@ -24,10 +24,6 @@ Arduino_GFX *gfx = new Arduino_ST7789(
   0, 0, 0, 0       // x, y offsets for 240x280 ST7789 panels
 );
 
-// ----- Touch Setup -----
-//CST816S touch(IIC_SDA, IIC_SCL, TP_RST, TP_INT);
-
-//void init_termiwatch(Arduino_GFX *gfx){
 void init_termiwatch(){
     if (!gfx->begin())
     {
@@ -60,7 +56,7 @@ void draw_termiwatch()
     vpos += gap;
 
     /* Time */
-    strftime(subStr, sizeof(subStr), "%I:%M %p", tmLocal);
+    strftime(subStr, sizeof(subStr), "%I:%M:%S %p", tmLocal);
     snprintf(textLine, sizeof(textLine), "[TIME] %s", subStr);
     gfx->setTextColor(RGB565_CYAN, RGB565_BLACK);
     gfx->setCursor(hpos, vpos);

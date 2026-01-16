@@ -18,22 +18,20 @@ void wifi_set_system_time()
   // Set domains to get time from
   configTime(gmtOffset_sec, 0, "time1.google.com", "pool.ntp.org");
 
-  // Wait 5 seconds for NTP time sync connection
+  // Wait for NTP time sync asynchronous operation to actually be valid
+  // If nowSecs < 10, it means we haven't jumped from epoch yet
   time_t nowSecs = time(nullptr);
   while (nowSecs < 10)
   {
     delay(500);
     Serial.print(".");
-    yield();
-    // While waiting, we get current time since epoch in seconds
-    nowSecs = time(nullptr);
+    nowSecs = time(nullptr); //update time to see if we jumped from epoch yet
   }
 
-  // Set the time
+  // Convert nowSecs to calendar struct with date/month/year etc.
   struct tm timeinfo;
-  localtime_r(&nowSecs, &timeinfo); // Using time_t nowSecs (seconds since epoch), convert
-                                 // to UTC calendar time (struct tm) timeinfo
-  // This differs from localtime_r which converts to, you guessed it, local time (relies on tzset timezone)
+  localtime_r(&nowSecs, &timeinfo); 
+                                 
 
   // Update RTC time with updated WiFi sync'd time
   rtc.setTime(timeinfo);
@@ -45,7 +43,6 @@ void wifi_set_system_time()
   // Turn off Wifi
   WiFi.disconnect();
   WiFi.mode(WIFI_OFF);
-
 }
 
 void init_clock()
@@ -55,7 +52,6 @@ void init_clock()
   // If first boot, set time from WiFi TODO do this every 24 hours?. Else get time from RTC
   if(get_boot_count() == 0){
     wifi_set_system_time();
-    // TODO if wifi fails update from RTC
   } else {
     // TODO rtc.updateSystemTime(){
       // Get time from rtc into calendar struct

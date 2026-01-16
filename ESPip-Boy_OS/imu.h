@@ -11,7 +11,7 @@ BMI270 imu;
 
 uint8_t i2cAddress = BMI2_I2C_PRIM_ADDR; // 0x68
 volatile bool imuInterruptOccurred = false;
-unsigned long lastWakeTime = 0;
+unsigned long lastActiveTime = 0;
 unsigned long lastFacingTime = 0;
 uint32_t step_count = 0;
 
@@ -103,40 +103,56 @@ void imu_init()
   
 bool isWatchFacing() 
 {
-  const int screen_focus_timeout_ms = 2000;
-
   if ( y > 0.6f && y < 0.9f && z > 0.5f && abs(x) < 0.5f ) {
     lastFacingTime = millis();
-    //Serial.println("Watch is focused...");
     return true;
   } else {
-    //Serial.println("Watch is unfocused...");
-    if (millis() - lastFacingTime > screen_focus_timeout_ms) {
-      Serial.printf("Screen out of focus for more than %d sec, turning off\n\n", screen_focus_timeout_ms / 1000);
-      go_sleep();
-    }
     return false;
   }
 }
 
+const int screen_focus_timeout_ms = 500;
+const int watch_inactive_timeout = 1000;
 void handle_watch_orientation()
 {
   if (millis() - lastIMUReading >= 20) {
+    // Update Sensor readings
     lastIMUReading = millis();
     imu.getSensorData();
     x = imu.data.accelX;
     y = imu.data.accelY;
     z = imu.data.accelZ;
 
-    // Screen off if watch is out of face up position
-    if (screen_is_on()) {
-      isWatchFacing(); // update lastFacing Time
-    } else {
-      if (isWatchFacing()){
-        display_screen_on();
+    // Get current watch stats based on sensor data
+    bool screenOn = screen_is_on();
+    bool watchFacing = isWatchFacing();
+
+    Serial.printf("Watch display: screen %s, facing? %s\n",
+        screenOn ? "On" : "Off",
+        watchFacing ? "Yes" : "No");
+
+    // Handle screen and esp32 sleep logic with updated position logic
+    if (screenOn && watchFacing) {
+      // update last active time
+      lastActiveTime = millis();
+    } else if (!screenOn && watchFacing){
+      display_screen_on();
+    } else if (screenOn && !watchFacing){
+      // Timeout display if screen is on and not facing user for more than timeout
+      long unsigned screen_not_focused_time = millis() - lastFacingTime;
+      if (screen_not_focused_time > screen_focus_timeout_ms) {
+        Serial.printf("Turning screen off, out of focus for %d ms.\n", screen_focus_timeout_ms);
+        display_screen_off();
       }
-    }
-  }
+    } else if (!screenOn && !watchFacing){
+      // Sleep watch if screen is off and not facing for more than timeout
+      long unsigned watch_inactive_time = millis() - lastActiveTime;
+      if (watch_inactive_time > watch_inactive_timeout) {
+        Serial.printf("Watch inactive for %d ms, going to deep sleep\n", watch_inactive_timeout);
+        go_sleep();
+      }
+    } //screen logic
+  } //imu reading
 }
 
 void imu_handle_interrupt()
@@ -152,14 +168,12 @@ void imu_handle_interrupt()
       {
           Serial.println("Wrist Focus Gesture Detected!");
           display_screen_on();
-          lastWakeTime = millis();
           lastFacingTime = millis();
       }
 
       if (interruptStatus & BMI270_ANY_MOT_STATUS_MASK)
       {
           Serial.println("Motion Detected!");
-          lastWakeTime = millis();
           //TODO
           //if (isWatchFacing())
           //    display_screen_on();

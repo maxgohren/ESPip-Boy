@@ -1,10 +1,7 @@
-#include "CST816S.h"
 #include <Wire.h>
-#include "SparkFun_BMI270_Arduino_Library.h"
-#include <Arduino_GFX_Library.h>
 
 #include "pinout.h"
-
+#include "pwm.h"
 #include "clock.h"
 #include "imu.h"
 #include "display.h"
@@ -14,6 +11,8 @@
 #include "rtc.h"
 #include "termiwatch.h"
 #include "flash.h"
+#include "touch.h"
+
 
 void setup(void)
 {
@@ -22,13 +21,15 @@ void setup(void)
 
   init_clock();
 
+  init_touch();
+
+  init_pwm();
+
   // Init Display ui
   init_termiwatch();
 
-  // Backlight control
-  //ledcAttach(LCD_BL, pwmFreq, pwmResolution);
-  display_bl_setup();
-  display_screen_off();
+  // Display backlight control
+  init_display();
 
   imu_init();
 
@@ -54,6 +55,9 @@ void loop()
 
   // flashlight
   handle_flashlight();
+
+  // handle touch
+  //handle_touch();
   
   // time processing
   static unsigned long lastTimeUpdate = 0;

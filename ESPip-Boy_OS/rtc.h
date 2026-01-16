@@ -46,11 +46,6 @@ public:
     // Set timezone for localtime_r() call
     setenv("TZ", "EST5EDT", 1);
     tzset();
-
-    Wire.beginTransmission(RTC_ADDR);
-    Wire.write(0x00);
-    Wire.write(0x00);
-    Wire.endTransmission();
     Serial.println("RTC Initialized!");
   }
   
@@ -70,7 +65,7 @@ public:
   void setTime(struct tm rtc_time)
   {
     Serial.printf(
-      "W: tm_sec=%d tm_min=%d tm_hour=%d tm_mday=%d tm_mon=%d tm_year=%d tm_wday=%d tm_yday=%d tm_isdst=%d\n",
+      "RTC W: tm_sec=%d tm_min=%d tm_hour=%d tm_mday=%d tm_mon=%d tm_year=%d tm_wday=%d tm_yday=%d tm_isdst=%d\n",
       rtc_time.tm_sec,
       rtc_time.tm_min,
       rtc_time.tm_hour,
@@ -92,7 +87,7 @@ public:
     writeRTC(YDAY, dec_to_bcd(rtc_time.tm_yday));
 
     Serial.printf(
-        "R: tm_sec=%d tm_min=%d tm_hour=%d tm_mday=%d tm_mon=%d tm_year=%d tm_wday=%d tm_yday=%d tm_isdst=%d\n",
+        "RTC R: tm_sec=%d tm_min=%d tm_hour=%d tm_mday=%d tm_mon=%d tm_year=%d tm_wday=%d tm_yday=%d tm_isdst=%d\n",
       bcd_to_dec(readRTC(SEC)),
       bcd_to_dec(readRTC(MIN)), 
       bcd_to_dec(readRTC(HOUR)), 
