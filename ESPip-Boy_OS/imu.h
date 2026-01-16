@@ -8,17 +8,26 @@
 
 // IMU Setup
 BMI270 imu;
-
 uint8_t i2cAddress = BMI2_I2C_PRIM_ADDR; // 0x68
+
 volatile bool imuInterruptOccurred = false;
-unsigned long lastActiveTime = 0;
-unsigned long lastFacingTime = 0;
+
 uint32_t step_count = 0;
 
+// Time variables
+unsigned long lastActiveTime = 0;
+unsigned long lastFacingTime = 0;
 unsigned long lastIMUReading = 0;
+
+// Watch State
+bool oldScreenOn = false;
+bool oldWatchFacing = false;
+bool imuScreenOn = false;
+bool watchFacing = false;
 double x = 0;
 double y = 0;
 double z = 0;
+
 
 
 int getStepCount()
@@ -123,28 +132,35 @@ void handle_watch_orientation()
     y = imu.data.accelY;
     z = imu.data.accelZ;
 
-    // Get current watch stats based on sensor data
-    bool screenOn = screen_is_on();
-    bool watchFacing = isWatchFacing();
+    // Record old state to monitor change
+    bool oldScreenOn = imuScreenOn;
+    bool oldWatchFacing = watchFacing;
 
-    Serial.printf("Watch display: screen %s, facing? %s\n",
-        screenOn ? "On" : "Off",
-        watchFacing ? "Yes" : "No");
+    // Calculate current state based on sensor data
+    imuScreenOn = screen_is_on();
+    watchFacing = isWatchFacing();
+
+    // Only write when state changed
+    if (imuScreenOn != oldScreenOn || watchFacing != oldWatchFacing){
+      Serial.printf("Watch display: screen %s, facing? %s\n",
+          imuScreenOn ? "On" : "Off",
+          watchFacing ? "Yes" : "No");
+    }
 
     // Handle screen and esp32 sleep logic with updated position logic
-    if (screenOn && watchFacing) {
+    if (imuScreenOn && watchFacing) {
       // update last active time
       lastActiveTime = millis();
-    } else if (!screenOn && watchFacing){
+    } else if (!imuScreenOn && watchFacing){
       display_screen_on();
-    } else if (screenOn && !watchFacing){
+    } else if (imuScreenOn && !watchFacing){
       // Timeout display if screen is on and not facing user for more than timeout
       long unsigned screen_not_focused_time = millis() - lastFacingTime;
       if (screen_not_focused_time > screen_focus_timeout_ms) {
         Serial.printf("Turning screen off, out of focus for %d ms.\n", screen_focus_timeout_ms);
         display_screen_off();
       }
-    } else if (!screenOn && !watchFacing){
+    } else if (!imuScreenOn && !watchFacing){
       // Sleep watch if screen is off and not facing for more than timeout
       long unsigned watch_inactive_time = millis() - lastActiveTime;
       if (watch_inactive_time > watch_inactive_timeout) {

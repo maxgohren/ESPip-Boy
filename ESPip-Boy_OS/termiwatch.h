@@ -24,20 +24,12 @@ Arduino_GFX *gfx = new Arduino_ST7789(
   0, 0, 0, 0       // x, y offsets for 240x280 ST7789 panels
 );
 
-void init_termiwatch(){
-    if (!gfx->begin())
-    {
-      Serial.println("gfx->begin() failed!");
-    }
-
-    gfx->fillScreen(BACKGROUND);
-
-    textSize = 2.5; // pixel multiplier
-    gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
-}
-
 void draw_termiwatch()
 {
+  // TODO if nothing changes, do not draw
+  // keep track of display changes, only draw things that change
+  // keep track of item state versus display state
+  // if item state changes, make call to change corresponding display state
     int vpos = 55;
     int hpos = 15;
     int gap = 25;
@@ -118,3 +110,19 @@ void draw_termiwatch()
     gfx->print(textLine);
     vpos += gap;
 }
+
+void init_termiwatch(){
+    if (!gfx->begin())
+    {
+      Serial.println("gfx->begin() failed!");
+    }
+
+    gfx->fillScreen(BACKGROUND);
+
+    textSize = 2.5; // pixel multiplier
+    gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
+
+    // make a single draw call to initialize display
+    draw_termiwatch();
+}
+

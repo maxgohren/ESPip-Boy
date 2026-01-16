@@ -1,7 +1,6 @@
 #include <Wire.h>
 
 #include "pinout.h"
-#include "pwm.h"
 #include "clock.h"
 #include "imu.h"
 #include "display.h"
@@ -23,12 +22,10 @@ void setup(void)
 
   init_touch();
 
-  init_pwm();
-
   // Init Display ui
   init_termiwatch();
 
-  // Display backlight control
+  // Display backlight control - turn on at bootup after ui in init
   init_display();
 
   imu_init();

@@ -50,6 +50,10 @@ void init_sleep_mode(Stream *S)
   // Configure gpio to be pulled down
   rtc_gpio_pullup_dis(WAKEUP_GPIO);
   rtc_gpio_pulldown_en(WAKEUP_GPIO);
+
+  // Display during sleep?
+  rtc_gpio_pullup_dis(GPIO_NUM_14);
+  rtc_gpio_pulldown_en(GPIO_NUM_14);
 }
 
 void set_power_saving_mode(){
