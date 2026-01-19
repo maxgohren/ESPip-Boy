@@ -41,14 +41,6 @@ uint8_t bin_to_weekday(uint8_t bin_weekday)
 
 class RTC {
 public:
-
-  void init(){
-    // Set timezone for localtime_r() call
-    setenv("TZ", "EST5EDT", 1);
-    tzset();
-    Serial.println("RTC Initialized!");
-  }
-  
   void getTime(struct tm *rtc_time)
   {
     rtc_time->tm_sec = bcd_to_dec(readRTC(SEC));

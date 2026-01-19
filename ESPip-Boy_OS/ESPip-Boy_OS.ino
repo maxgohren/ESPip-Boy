@@ -34,9 +34,6 @@ void setup(void)
   fuelGauge.begin(4, 16);
   //fuelGauge.configureBattery(); Only really needs to be done once
 
-  // Sleep
-  init_sleep_mode(&Serial);
-
   // Flashlight
   init_flashlight();
 
@@ -47,7 +44,6 @@ void setup(void)
 void loop()
 {
   // imu processing
-  imu_handle_interrupt();
   handle_watch_orientation();
 
   // flashlight
