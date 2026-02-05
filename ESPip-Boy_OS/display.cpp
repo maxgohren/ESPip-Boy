@@ -18,7 +18,7 @@ void display_screen_off()
   if (!screenOn) return;
 
 #if BACKLIGHT_PWM
-  for (int duty = 255; duty >= 0; duty--) {
+  for (int duty = 64; duty >= 0; duty--) {
     ledcWrite(BL_PIN, duty);
     delay(5);
   }
@@ -37,7 +37,7 @@ void display_screen_on()
 
 #if BACKLIGHT_PWM
   // TODO make this asynchronous
-  for (int duty = 0; duty <= 255; duty++) {
+  for (int duty = 0; duty <= 64; duty++) {
     ledcWrite(BL_PIN, duty);
     delay(5);
   }

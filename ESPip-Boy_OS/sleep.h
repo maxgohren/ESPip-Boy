@@ -5,4 +5,5 @@
 void init_sleep_mode();
 void set_power_saving_mode();
 void go_sleep();
+bool user_active();
 

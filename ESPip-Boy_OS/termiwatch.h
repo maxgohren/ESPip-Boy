@@ -7,13 +7,17 @@
 #include "imu.h"
 
 #define BACKGROUND RGB565_BLACK
+#define LCD_WIDTH  240
+#define LCD_HEIGHT 280
 
 int  textSize;
 char textLine[100];
 char subStr[50];
 
 // ----- Display Setup -----
+
 Arduino_DataBus *bus = new Arduino_ESP32SPI(LCD_DC, LCD_CS, LCD_SCK, LCD_MOSI);
+
 Arduino_GFX *gfx = new Arduino_ST7789(
   bus,
   LCD_RST,          // RST pin
@@ -21,7 +25,7 @@ Arduino_GFX *gfx = new Arduino_ST7789(
   true,             // IPS
   LCD_WIDTH,
   LCD_HEIGHT,
-  0, 0, 0, 0       // x, y offsets for 240x280 ST7789 panels
+  0, 20, 0, 0       // x, y offsets for 240x280 ST7789 panels
 );
 
 void draw_termiwatch()
@@ -30,7 +34,7 @@ void draw_termiwatch()
   // keep track of display changes, only draw things that change
   // keep track of item state versus display state
   // if item state changes, make call to change corresponding display state
-    int vpos = 55;
+    int vpos = 35;
     int hpos = 15;
     int gap = 25;
 
@@ -111,13 +115,28 @@ void draw_termiwatch()
     vpos += gap;
 }
 
+void hard_reset_display()
+{
+  pinMode(LCD_RST, OUTPUT);
+  digitalWrite(LCD_RST, LOW);
+  delay(20);
+  digitalWrite(LCD_RST, HIGH);
+  delay(120);
+}
+
 void init_termiwatch(){
+
+    Serial.printf("Init display w: %d, h: %d\n", LCD_WIDTH, LCD_HEIGHT);
+
     if (!gfx->begin())
     {
       Serial.println("gfx->begin() failed!");
     }
 
-    gfx->fillScreen(BACKGROUND);
+    //hard_reset_display();
+
+    //gfx->fillScreen(BACKGROUND); // misses bottom edge of screen
+    gfx->fillRect(0, 0, LCD_WIDTH, 320, RGB565_BLACK);
 
     textSize = 2.5; // pixel multiplier
     gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);

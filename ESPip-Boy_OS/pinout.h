@@ -8,9 +8,6 @@
 #define LCD_BL     14
 #define LCD_MOSI   23
 
-#define LCD_WIDTH  240
-#define LCD_HEIGHT 280
-
 #define IIC_SDA    4
 #define IIC_SCL    16
 

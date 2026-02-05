@@ -12,7 +12,6 @@
 #include "flash.h"
 #include "touch.h"
 
-
 void setup(void)
 {
   Serial.begin(115200);
@@ -50,7 +49,7 @@ void loop()
   handle_flashlight();
 
   // handle touch
-  //handle_touch();
+  handle_touch();
   
   // time processing
   static unsigned long lastTimeUpdate = 0;

@@ -1,6 +1,7 @@
 #include "sleep.h"
 #include "imu.h"
 #include "display.h"
+#include "flash.h"
 
 #define WAKE_PIN GPIO_NUM_33
 
@@ -8,8 +9,17 @@ void set_power_saving_mode(){
   imu_set_low_power();
 }
 
+bool user_active()
+{
+  if (flash_on()) 
+    return true;
+  else
+    return false;
+}
+
 void go_sleep()
 {
+  if (user_active()) return;
   // Wakeup from touch screen goes low
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_33, 0);
   

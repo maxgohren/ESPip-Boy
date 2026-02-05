@@ -8,11 +8,19 @@ const long gmtOffset_sec = -5 * 60 * 60; // -5 hours
 void wifi_set_system_time()
 {
   // Connect to Wifi 
+  int retries = 0;
+  const int max_retries = 20;
   WiFi.begin(SSID_NAME, SSID_PASSWORD);
   while (WiFi.status() != WL_CONNECTED)
   {
-    Serial.print('.');
-    delay(500);
+    if (retries < max_retries){
+      retries++;
+      Serial.print('.');
+      delay(500);
+    } else {
+      Serial.println("Failed to connect to WiFi. Cannot set system time.");
+      break;
+    }
   }
   
   // Set domains to get time from
