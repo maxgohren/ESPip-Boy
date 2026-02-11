@@ -27,3 +27,5 @@ fp-lib-table
 *.FCStd.lock
 *.stl
 *.FCBak
+test/
+eez-ui/
