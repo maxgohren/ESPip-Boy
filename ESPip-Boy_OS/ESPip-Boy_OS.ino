@@ -1,4 +1,6 @@
 #include <Wire.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #include "pinout.h"
 #include "clock.h"
@@ -42,22 +44,9 @@ void setup(void)
 
 void loop()
 {
-  // imu processing
   handle_watch_orientation();
-
-  // flashlight
   handle_flashlight();
-
-  // handle touch
   handle_touch();
   
-  // time processing
-  static unsigned long lastTimeUpdate = 0;
-  if (millis() - lastTimeUpdate >= 1000) {
-    lastTimeUpdate = millis();
-
-    // Update UI once a second
-    draw_termiwatch();
-  }
-
+  vTaskDelay(pdMS_TO_TICKS(10)); // allow scheduler some breathing room
 }

@@ -5,6 +5,8 @@
 #include <Arduino_GFX_Library.h>
 #include "flash.h"
 #include "imu.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #define BACKGROUND RGB565_BLACK
 #define LCD_WIDTH  240
@@ -13,6 +15,10 @@
 int  textSize;
 char textLine[100];
 char subStr[50];
+
+// ----- FreeRTOS -----
+SemaphoreHandle_t spiMutex;
+TaskHandle_t displayUpdateTaskHandle = NULL;
 
 // ----- Display Setup -----
 
@@ -115,33 +121,62 @@ void draw_termiwatch()
     vpos += gap;
 }
 
-void hard_reset_display()
+void DisplayUpdateTask(void *parameter)
 {
-  pinMode(LCD_RST, OUTPUT);
-  digitalWrite(LCD_RST, LOW);
-  delay(20);
-  digitalWrite(LCD_RST, HIGH);
-  delay(120);
+  TickType_t lastWakeTime = xTaskGetTickCount();
+
+  // IMMEDIATELY DRAW WHEN CALLED ON STARTUP
+  if (xSemaphoreTake(spiMutex, portMAX_DELAY))
+  {
+    draw_termiwatch();
+    xSemaphoreGive(spiMutex);
+  }
+
+  while(true)
+  {
+    // Wait exactly 1 second
+    vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(1000));
+
+    // Protect SPI bus from any other transactions
+    if (xSemaphoreTake(spiMutex, portMAX_DELAY))
+    {
+      draw_termiwatch();
+      xSemaphoreGive(spiMutex);
+    }
+  }
+
 }
 
-void init_termiwatch(){
-
+void init_termiwatch()
+{
     Serial.printf("Init display w: %d, h: %d\n", LCD_WIDTH, LCD_HEIGHT);
 
-    if (!gfx->begin())
+    spiMutex = xSemaphoreCreateMutex();
+
+    if (xSemaphoreTake(spiMutex, portMAX_DELAY))
     {
-      Serial.println("gfx->begin() failed!");
+      if (!gfx->begin())
+      {
+        Serial.println("gfx->begin() failed!");
+      }
+
+      //gfx->fillScreen(BACKGROUND); // misses bottom edge of screen
+      gfx->fillRect(0, 0, LCD_WIDTH, 320, RGB565_BLACK);
+
+      textSize = 2.5; // pixel multiplier
+      gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
+
+      xSemaphoreGive(spiMutex);
     }
 
-    //hard_reset_display();
-
-    //gfx->fillScreen(BACKGROUND); // misses bottom edge of screen
-    gfx->fillRect(0, 0, LCD_WIDTH, 320, RGB565_BLACK);
-
-    textSize = 2.5; // pixel multiplier
-    gfx->setTextSize(textSize, textSize, 2 /* pixel_margin */);
-
-    // make a single draw call to initialize display
-    draw_termiwatch();
+    // Start drawing task
+    xTaskCreatePinnedToCore(
+        DisplayUpdateTask,
+        "DisplayUpdateTask",
+        4096,
+        NULL,
+        2, // higher priority than display backlight fade
+        &displayUpdateTaskHandle,
+        1); // same core
 }
 
