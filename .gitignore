@@ -4,7 +4,7 @@ tags
 
 # SW
 wifi_config.h
-secrets.h
+*secrets*
 
 # KiCad Project Files to Ignore
 *.bak
