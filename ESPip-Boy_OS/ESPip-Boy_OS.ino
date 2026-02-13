@@ -8,11 +8,11 @@
 #include "display.h"
 #include "sleep.h"
 #include "fuel.h"
-#include "loading_screen.h"
 #include "rtc.h"
 #include "termiwatch.h"
 #include "flash.h"
 #include "touch.h"
+#include "weather.h"
 
 void setup(void)
 {
@@ -22,6 +22,8 @@ void setup(void)
   init_clock();
 
   init_touch();
+
+  init_weather_service();
 
   // Init Display ui
   init_termiwatch();

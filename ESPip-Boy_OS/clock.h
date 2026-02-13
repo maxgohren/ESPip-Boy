@@ -1,5 +1,5 @@
 #include <WiFi.h>
-#include "wifi_config.h"
+#include "secrets.h"
 #include "rtc.h"
 #include "sleep.h"
 

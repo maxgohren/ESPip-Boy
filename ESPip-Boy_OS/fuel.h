@@ -102,4 +102,4 @@ private:
 };
 
 // ----- Fuel Gauge -----
-BQ27421 fuelGauge;
+extern BQ27421 fuelGauge;

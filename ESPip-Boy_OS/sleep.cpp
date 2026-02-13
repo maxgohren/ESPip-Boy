@@ -2,6 +2,7 @@
 #include "imu.h"
 #include "display.h"
 #include "flash.h"
+#include "weather.h"
 
 #define WAKE_PIN GPIO_NUM_33
 
@@ -11,7 +12,7 @@ void set_power_saving_mode(){
 
 bool user_active()
 {
-  if (flash_on()) 
+  if (flash_on() || fetching_weather()) 
     return true;
   else
     return false;
