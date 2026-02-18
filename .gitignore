@@ -26,7 +26,6 @@ fp-lib-table
 
 # FreeCAD Project Files to Ignore
 *.FCStd.lock
-*.stl
 *.FCBak
 test/
 eez-ui/
