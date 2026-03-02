@@ -1,3 +1,4 @@
+#include "log.h"
 #include <Wire.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -17,7 +18,7 @@
 
 void setup(void)
 {
-  Serial.begin(115200);
+  DEBUG_BEGIN(115200);
   Wire.begin(IIC_SDA, IIC_SCL);
 
   init_clock();
@@ -42,7 +43,7 @@ void setup(void)
   
   init_task_monitor();
 
-  Serial.println("ESPip-Boy init complete.");
+  DEBUG_PRINTLN("ESPip-Boy init complete.");
 }
 
 

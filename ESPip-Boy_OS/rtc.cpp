@@ -1,3 +1,4 @@
+#include "log.h"
 #include <Wire.h>
 #include "rtc.h"
 
@@ -53,7 +54,7 @@ void RTC::getTime(struct tm *rtc_time)
 
 void RTC::setTime(struct tm rtc_time)
 {
-    Serial.printf(
+    DEBUG_PRINTF(
     "RTC W: tm_sec=%d tm_min=%d tm_hour=%d tm_mday=%d tm_mon=%d tm_year=%d tm_wday=%d tm_yday=%d tm_isdst=%d\n",
         rtc_time.tm_sec,
         rtc_time.tm_min,
@@ -75,7 +76,7 @@ void RTC::setTime(struct tm rtc_time)
     writeRTC(YEAR, dec_to_bcd(rtc_time.tm_year));
     writeRTC(YDAY, dec_to_bcd(rtc_time.tm_yday));
 
-    Serial.printf(
+    DEBUG_PRINTF(
         "RTC R: tm_sec=%d tm_min=%d tm_hour=%d tm_mday=%d tm_mon=%d tm_year=%d tm_wday=%d tm_yday=%d tm_isdst=%d\n",
         bcd_to_dec(readRTC(SEC)),
         bcd_to_dec(readRTC(MIN)), 
@@ -86,7 +87,7 @@ void RTC::setTime(struct tm rtc_time)
         bin_to_weekday(readRTC(WDAY)), 
         bcd_to_dec(readRTC(YDAY)),
         0);
-        Serial.println();
+        DEBUG_PRINTLN();
 }
 
 float RTC::getTemp(){

@@ -1,3 +1,4 @@
+#include "log.h"
 #include <Arduino.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -88,5 +89,5 @@ void init_display()
 
   display_screen_on(); // Start with fade up
 
-  //Serial.printf("Display init with %s control.\n", BACKLIGHT_PWM ? "PWM" : "GPIO");
+  //DEBUG_PRINTF("Display init with %s control.\n", BACKLIGHT_PWM ? "PWM" : "GPIO");
 }

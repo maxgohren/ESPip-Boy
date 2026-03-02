@@ -1,3 +1,4 @@
+#include "log.h"
 #include "SparkFun_BMI270_Arduino_Library.h"
 #include <Wire.h>
 #include "imu.h"
@@ -56,11 +57,11 @@ static void imu_handle_interrupt()
       imu.getInterruptStatus(&interruptStatus);
 
       if(interruptStatus & BMI270_WRIST_WAKE_UP_STATUS_MASK){
-          Serial.println("Wrist Focus Gesture Detected!");
+          DEBUG_PRINTLN("Wrist Focus Gesture Detected!");
       }
 
       if (interruptStatus & BMI270_ANY_MOT_STATUS_MASK){
-          Serial.println("Motion Detected!");
+          DEBUG_PRINTLN("Motion Detected!");
       }
 
       // Check if this is the correct interrupt condition
@@ -93,7 +94,7 @@ void handle_watch_orientation()
 
     // Only write when state changed
     if (imuScreenOn != oldScreenOn || watchFacing != oldWatchFacing){
-      Serial.printf("Watch display: screen %s, facing? %s\n",
+      DEBUG_PRINTF("Watch display: screen %s, facing? %s\n",
           imuScreenOn ? "On" : "Off",
           watchFacing ? "Yes" : "No");
     }
@@ -108,14 +109,16 @@ void handle_watch_orientation()
       // Timeout display if screen is on and not facing user for more than timeout
       long unsigned screen_not_focused_time = millis() - lastFacingTime;
       if (screen_not_focused_time > screen_focus_timeout_ms) {
-        Serial.printf("Turning screen off, out of focus for %d ms.\n", screen_focus_timeout_ms);
+        DEBUG_PRINTF("Turning screen off, out of focus for %d ms.\n", screen_focus_timeout_ms);
         display_screen_off();
       }
     } else if (!imuScreenOn && !watchFacing){
       // Sleep watch if screen is off and not facing for more than timeout
       long unsigned watch_inactive_time = millis() - lastActiveTime;
       if (watch_inactive_time > watch_inactive_timeout) {
-        Serial.printf("Watch inactive for %d ms, going to deep sleep\n", watch_inactive_timeout);
+        // TODO remove hammering of this debug_printf while user_active blocks sleep
+        // need to create some kind of sleep manager task that reads a sleep flag
+        DEBUG_PRINTF("Watch inactive for %d ms, going to deep sleep\n", watch_inactive_timeout);
         go_sleep();
       }
     } //screen logic
@@ -137,13 +140,13 @@ void imu_init()
   while(imu.beginI2C(i2cAddress) != BMI2_OK)
   {
       static int retries = 0;
-      Serial.println("Error: BMI270 not connected, check wiring and I2C address!");
+      DEBUG_PRINTLN("Error: BMI270 not connected, check wiring and I2C address!");
       delay(1000);
       retries++;
       if (retries == 5) {
         break;
       }
-      Serial.println("BMI270 not initialized, must press button to turn screen on");
+      DEBUG_PRINTLN("BMI270 not initialized, must press button to turn screen on");
   }
 
   imu.enableFeature(BMI2_WRIST_WEAR_WAKE_UP);
@@ -181,7 +184,7 @@ void imu_init()
   intPinConfig.pin_cfg[0].input_en = BMI2_INT_INPUT_DISABLE;
   imu.setInterruptPinConfig(intPinConfig);
   attachInterrupt(digitalPinToInterrupt(IMU_INT), imuInterruptHandler, RISING);
-  Serial.println("IMU init complete.");
+  DEBUG_PRINTLN("IMU init complete.");
 }
   
 

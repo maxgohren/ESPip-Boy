@@ -1,3 +1,4 @@
+#include "log.h"
 #include "weather.h"
 #include "secrets.h"
 #include <time.h>
@@ -46,7 +47,7 @@ void init_weather_service()
 WeatherData WeatherService_getWeather()
 {
     if (!rtcHasData) {
-        Serial.println("No forecast data available!");
+        DEBUG_PRINTLN("No forecast data available!");
         return WeatherData{};
     }
 
@@ -79,7 +80,7 @@ static void weatherTask(void * parameter)
 {
     // Fetch weather once on poweron
     if(esp_reset_reason() == ESP_RST_POWERON){
-        Serial.println("Power-on detected. Fetching initial weather forecast...");
+        DEBUG_PRINTLN("Power-on detected. Fetching initial weather forecast...");
         fetchingWeather = true;
         // Connect to Wifi 
         int retries = 0;
@@ -89,10 +90,10 @@ static void weatherTask(void * parameter)
         {
             if (retries < max_retries){
             retries++;
-            Serial.print('.');
+            DEBUG_PRINT('.');
             delay(500);
             } else {
-            Serial.println("Failed to connect to WiFi. Cannot set system time.");
+            DEBUG_PRINTLN("Failed to connect to WiFi. Cannot set system time.");
             break;
             }
         }
@@ -126,12 +127,12 @@ static void weatherTask(void * parameter)
         }
 
         if (!needFetch) {
-            Serial.println("Weather data fresh; skipping fetch.");
+            DEBUG_PRINTLN("Weather data fresh; skipping fetch.");
             vTaskDelay(WEATHER_UPDATE_INTERVAL_MS / portTICK_PERIOD_MS);
             continue;
         }
 
-        Serial.println("Weather stale or missing; updating forecast...");
+        DEBUG_PRINTLN("Weather stale or missing; updating forecast...");
         fetchingWeather = true;
         // Connect to Wifi 
         int retries = 0;
@@ -141,10 +142,10 @@ static void weatherTask(void * parameter)
         {
             if (retries < max_retries){
             retries++;
-            Serial.print('.');
+            DEBUG_PRINT('.');
             delay(500);
             } else {
-            Serial.println("Failed to connect to WiFi. Cannot set system time.");
+            DEBUG_PRINTLN("Failed to connect to WiFi. Cannot set system time.");
             break;
             }
         }
@@ -175,9 +176,9 @@ static bool fetchWeatherForecast()
     // TODO install OpenWeatherMap root_ca into PROG_MEM[]
     client.setInsecure(); // skip cert validation
 
-    Serial.println("Connecting to OpenWeatherMap...");
+    DEBUG_PRINTLN("Connecting to OpenWeatherMap...");
     if (!client.connect(host, httpsPort)) {
-        Serial.println("Connection failed!");
+        DEBUG_PRINTLN("Connection failed!");
         return false;
     }
 
@@ -207,7 +208,7 @@ static bool fetchWeatherForecast()
 
         // Timeout after 5 seconds
         if ((xTaskGetTickCount() - startTick) > pdMS_TO_TICKS(5000)) {
-            Serial.println("Timeout waiting for weather response");
+            DEBUG_PRINTLN("Timeout waiting for weather response");
             client.stop();
             return false;
         }
@@ -242,8 +243,8 @@ static bool fetchWeatherForecast()
     DeserializationError error = deserializeJson(doc, payload);
 
     if (error) {
-        Serial.print("JSON parsing failed: ");
-        Serial.println(error.c_str());
+        DEBUG_PRINT("JSON parsing failed: ");
+        DEBUG_PRINTLN(error.c_str());
         return false;
     }
 
@@ -260,15 +261,15 @@ static bool fetchWeatherForecast()
         rtcWeatherDataArray[i].forecastTime = list[i]["dt"].as<long>();
 
         // Print values
-        Serial.print("Entry "); Serial.print(i);
-        Serial.print(": Temp="); Serial.print(rtcWeatherDataArray[i].temperature);
-        Serial.print("C, Humidity="); Serial.print(rtcWeatherDataArray[i].humidity);
-        Serial.print("%, Precip="); Serial.print(rtcWeatherDataArray[i].precipitation);
-        Serial.print("mm, Timestamp="); Serial.println(rtcWeatherDataArray[i].forecastTime);
+        DEBUG_PRINT("Entry "); DEBUG_PRINT(i);
+        DEBUG_PRINT(": Temp="); DEBUG_PRINT(rtcWeatherDataArray[i].temperature);
+        DEBUG_PRINT("C, Humidity="); DEBUG_PRINT(rtcWeatherDataArray[i].humidity);
+        DEBUG_PRINT("%, Precip="); DEBUG_PRINT(rtcWeatherDataArray[i].precipitation);
+        DEBUG_PRINT("mm, Timestamp="); DEBUG_PRINTLN(rtcWeatherDataArray[i].forecastTime);
     }
 
     rtcHasData = true;
-    Serial.println("Weather forecast updated successfully.");
+    DEBUG_PRINTLN("Weather forecast updated successfully.");
     return true;
 }
 

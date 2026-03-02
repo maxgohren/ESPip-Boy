@@ -1,3 +1,4 @@
+#include "log.h"
 #include "sleep.h"
 #include "imu.h"
 #include "display.h"
@@ -35,7 +36,7 @@ void go_sleep()
 
   display_screen_off();
 
-  Serial.println("Going to deep sleep.");
+  DEBUG_PRINTLN("Going to deep sleep.");
   esp_deep_sleep_start();
 }
 
@@ -85,7 +86,7 @@ void isolate_unused_gpio(void)
 
   power_down_periphs();
 
-  Serial.println("Going to deep sleep.");
+  DEBUG_PRINTLN("Going to deep sleep.");
   delay(50); // Allow UART to flush
   esp_deep_sleep_start();
 #endif

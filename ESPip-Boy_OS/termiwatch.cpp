@@ -2,6 +2,7 @@
  * https://github.com/kuglee/TermiWatch?tab=readme-ov-file 
  */
 
+#include "log.h"
 #include <Arduino_GFX_Library.h>
 #include "termiwatch.h"
 #include "flash.h"
@@ -156,7 +157,7 @@ static void DisplayUpdateTask(void *parameter)
 
 void init_termiwatch()
 {
-    Serial.printf("Init display w: %d, h: %d\n", LCD_WIDTH, LCD_HEIGHT);
+    DEBUG_PRINTF("Init display w: %d, h: %d\n", LCD_WIDTH, LCD_HEIGHT);
 
     spiMutex = xSemaphoreCreateMutex();
 
@@ -164,7 +165,7 @@ void init_termiwatch()
     {
       if (!gfx->begin())
       {
-        Serial.println("gfx->begin() failed!");
+        DEBUG_PRINTLN("gfx->begin() failed!");
       }
 
       //gfx->fillScreen(BACKGROUND); // misses bottom edge of screen

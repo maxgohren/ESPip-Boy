@@ -1,3 +1,4 @@
+#include "log.h"
 #include "Arduino.h"
 #include "flash.h"
 #include "pinout.h"
@@ -66,7 +67,7 @@ void handle_flashlight()
   if (io0 == 0 && millis() - 250 > last_toggle_time){
     last_toggle_time = millis();
 
-    Serial.println("Button pressed.");
+    DEBUG_PRINTLN("Button pressed.");
     oldToggleState = toggleState;
     toggleState ^= HIGH; 
 

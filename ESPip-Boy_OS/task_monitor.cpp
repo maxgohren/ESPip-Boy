@@ -1,3 +1,4 @@
+#include "log.h"
 #include <Arduino.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -9,8 +10,8 @@ void TaskMonitor(void *pvParameters)
 {
     while (true)
     {
-        Serial.println();
-        Serial.println("===== FreeRTOS Task Monitor =====");
+        DEBUG_PRINTLN();
+        DEBUG_PRINTLN("===== FreeRTOS Task Monitor =====");
 
         UBaseType_t taskCount = uxTaskGetNumberOfTasks();
         TaskStatus_t *taskStatusArray;
@@ -30,7 +31,7 @@ void TaskMonitor(void *pvParameters)
             if (totalRunTime == 0)
                 totalRunTime = 1;
 
-            Serial.printf("%-16s %-6s %-6s %-8s %-6s %-6s\n",
+            DEBUG_PRINTF("%-16s %-6s %-6s %-8s %-6s %-6s\n",
                           "Name", "Core", "Prio", "CPU %", "Stack", "State");
 
             for (UBaseType_t i = 0; i < taskCount; i++)
@@ -67,7 +68,7 @@ void TaskMonitor(void *pvParameters)
                 BaseType_t core = -1;
 #endif
 
-                Serial.printf("%-16s %-6d %-6d %-8lu %-6u %-6s\n",
+                DEBUG_PRINTF("%-16s %-6d %-6d %-8lu %-6u %-6s\n",
                               taskStatusArray[i].pcTaskName,
                               core,
                               taskStatusArray[i].uxCurrentPriority,
@@ -80,10 +81,10 @@ void TaskMonitor(void *pvParameters)
         }
         else
         {
-            Serial.println("Failed to allocate memory for task stats.");
+            DEBUG_PRINTLN("Failed to allocate memory for task stats.");
         }
 
-        Serial.println("=================================\n");
+        DEBUG_PRINTLN("=================================\n");
 
         vTaskDelay(pdMS_TO_TICKS(TASK_MONITOR_INTERVAL_MS));
     }

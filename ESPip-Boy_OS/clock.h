@@ -1,3 +1,4 @@
+#include "log.h"
 #include <WiFi.h>
 #include "secrets.h"
 #include "rtc.h"
@@ -15,10 +16,10 @@ void wifi_set_system_time()
   {
     if (retries < max_retries){
       retries++;
-      Serial.print('.');
+      DEBUG_PRINT('.');
       delay(500);
     } else {
-      Serial.println("Failed to connect to WiFi. Cannot set system time.");
+      DEBUG_PRINTLN("Failed to connect to WiFi. Cannot set system time.");
       break;
     }
   }
@@ -32,7 +33,7 @@ void wifi_set_system_time()
   while (nowSecs < 10)
   {
     delay(500);
-    Serial.print(".");
+    DEBUG_PRINT(".");
     nowSecs = time(nullptr); //update time to see if we jumped from epoch yet
   }
 
@@ -46,7 +47,7 @@ void wifi_set_system_time()
 
   // Print 
   char buf[26];
-  Serial.printf("WiFi:  localtime_r: %s\n", asctime_r(&timeinfo, buf));
+  DEBUG_PRINTF("WiFi:  localtime_r: %s\n", asctime_r(&timeinfo, buf));
 
   // Turn off Wifi
   WiFi.disconnect();
@@ -80,7 +81,7 @@ void init_clock()
       // Verify time is set correctly
       time_t now;
       time(&now);
-      Serial.println(ctime(&now));
+      DEBUG_PRINTLN(ctime(&now));
   //}
   }
 }

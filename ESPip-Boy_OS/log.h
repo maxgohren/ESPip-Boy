@@ -1,7 +1,7 @@
 #pragma once
 
 // Uncomment to enable debug
-#define DEBUG_ENABLED
+//#define DEBUG_ENABLED
 
 #ifdef DEBUG_ENABLED
 
