@@ -13,6 +13,7 @@
 #include "flash.h"
 #include "touch.h"
 #include "weather.h"
+#include "task_monitor.h"
 
 void setup(void)
 {
@@ -37,8 +38,9 @@ void setup(void)
   fuelGauge.begin(4, 16);
   //fuelGauge.configureBattery(); Only really needs to be done once
 
-  // Flashlight
   init_flashlight();
+  
+  init_task_monitor();
 
   Serial.println("ESPip-Boy init complete.");
 }
