@@ -75,7 +75,7 @@ void handle_watch_orientation()
 {
   imu_handle_interrupt();
 
-  if (millis() - lastIMUReading >= 20) {
+  if (millis() - lastIMUReading >= 100) {
     // Update Sensor readings
     lastIMUReading = millis();
     imu.getSensorData(); // TODO make this a one-shot read on device, no need to poll higher in
