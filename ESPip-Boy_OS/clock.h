@@ -4,8 +4,6 @@
 #include "rtc.h"
 #include "sleep.h"
 
-const long gmtOffset_sec = -5 * 60 * 60; // -5 hours
-
 void wifi_set_system_time()
 {
   // Connect to Wifi 
@@ -25,7 +23,8 @@ void wifi_set_system_time()
   }
   
   // Set domains to get time from
-  configTime(gmtOffset_sec, 0, "time1.google.com", "pool.ntp.org");
+  const char* time_zone = "EST5EDT,M3.2.0,M11.1.0";
+  configTzTime(time_zone, "pool.ntp.org");
 
   // Wait for NTP time sync asynchronous operation to actually be valid
   // If nowSecs < 10, it means we haven't jumped from epoch yet
