@@ -55,10 +55,6 @@ void wifi_set_system_time()
 
 void init_clock()
 {
-  // Set timezone for localtime_r() call
-  setenv("TZ", "EST5EDT", 1);
-  tzset();
-
   // If first boot, set time from WiFi TODO do this every 24 hours?. Else get time from RTC
   if(esp_reset_reason() == ESP_RST_POWERON){
     wifi_set_system_time();
