@@ -1,6 +1,7 @@
 #include "log.h"
 #include "weather.h"
 #include "secrets.h"
+#include "wifi_mgr.h"
 #include <time.h>
 
 #include <WiFi.h>
@@ -82,31 +83,16 @@ static void weatherTask(void * parameter)
     if(esp_reset_reason() == ESP_RST_POWERON){
         DEBUG_PRINTLN("Power-on detected. Fetching initial weather forecast...");
         fetchingWeather = true;
-        // Connect to Wifi 
-        int retries = 0;
-        const int max_retries = 20;
-        WiFi.begin(SSID_NAME, SSID_PASSWORD);
-        while (WiFi.status() != WL_CONNECTED)
-        {
-            if (retries < max_retries){
-            retries++;
-            DEBUG_PRINT('.');
-            delay(500);
-            } else {
-            DEBUG_PRINTLN("Failed to connect to WiFi. Cannot set system time.");
-            break;
-            }
-        }
-
-        if (WiFi.status() == WL_CONNECTED) {
+        WifiMgr::Result result = WifiMgr::connect();
+        if (result == WifiMgr::Result::Connected || result == WifiMgr::Result::AlreadyConnected) {
             if (fetchWeatherForecast()) {
                 rtcWeatherLastFetch = time(nullptr);
             }
+        } else {
+            DEBUG_PRINTLN("WifiMgr: Unable to connect to WiFi; skipping initial weather fetch.");
         }
 
-        // Turn off Wifi
-        WiFi.disconnect();
-        WiFi.mode(WIFI_OFF);
+        WifiMgr::disconnect();
         fetchingWeather = false;
     }
 
@@ -115,14 +101,14 @@ static void weatherTask(void * parameter)
         time_t now = time(nullptr);
 
         bool needFetch = false;
-        const time_t fifteenHours = 15 * 3600;
+        const time_t twentyFourHours = 24 * 3600;
 
         if (!rtcHasData) {
             needFetch = true;
         } else if (now == 0) {
             // No valid system time yet; treat as stale so attempt to refresh
             needFetch = true;
-        } else if ((now - rtcWeatherLastFetch) >= fifteenHours) {
+        } else if ((now - rtcWeatherLastFetch) >= twentyFourHours) {
             needFetch = true;
         }
 
@@ -134,32 +120,20 @@ static void weatherTask(void * parameter)
 
         DEBUG_PRINTLN("Weather stale or missing; updating forecast...");
         fetchingWeather = true;
-        // Connect to Wifi 
-        int retries = 0;
-        const int max_retries = 20;
-        WiFi.begin(SSID_NAME, SSID_PASSWORD);
-        while (WiFi.status() != WL_CONNECTED)
-        {
-            if (retries < max_retries){
-            retries++;
-            DEBUG_PRINT('.');
-            delay(500);
-            } else {
-            DEBUG_PRINTLN("Failed to connect to WiFi. Cannot set system time.");
-            break;
-            }
-        }
-
-        if (WiFi.status() == WL_CONNECTED) {
+        WifiMgr::Result result = WifiMgr::connect();
+        if (result == WifiMgr::Result::Connected || result == WifiMgr::Result::AlreadyConnected) {
             if (fetchWeatherForecast()) {
                 rtcWeatherLastFetch = time(nullptr);
             }
+        } else {
+            DEBUG_PRINTLN("WifiMgr: Unable to connect to WiFi; skipping weather update.");
+            // If we can't connect, don't burn CPU by retrying immediately
+            fetchingWeather = false;
+            vTaskDelay(WEATHER_UPDATE_INTERVAL_MS / portTICK_PERIOD_MS);
         }
-
-        // Turn off Wifi
-        WiFi.disconnect();
-        WiFi.mode(WIFI_OFF);
         fetchingWeather = false;
+
+        WifiMgr::disconnect();
     }
 }
 
@@ -198,8 +172,7 @@ static bool fetchWeatherForecast()
 
     while (client.connected() && !client.available()) { delay(10); }
     /* TODO NON-block weather */
-    /* set a global flag indicating weather is being fetched, 
-    pass to sleep to not allow watch to sleep until finished*/
+    /* share flag with other {sleep, WiFi} tasks indicating weather is being fetched */
     // Wait for response
     /*
     TickType_t startTick = xTaskGetTickCount();

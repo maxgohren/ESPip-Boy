@@ -1,27 +1,19 @@
 #include "log.h"
 #include <WiFi.h>
 #include "secrets.h"
+#include "wifi_mgr.h"
 #include "rtc.h"
 #include "sleep.h"
 
 void wifi_set_system_time()
 {
-  // Connect to Wifi 
-  int retries = 0;
-  const int max_retries = 20;
-  WiFi.begin(SSID_NAME, SSID_PASSWORD);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    if (retries < max_retries){
-      retries++;
-      DEBUG_PRINT('.');
-      delay(500);
-    } else {
-      DEBUG_PRINTLN("Failed to connect to WiFi. Cannot set system time.");
-      break;
-    }
+  // Connect to Wifi
+  WifiMgr::Result result = WifiMgr::connect();
+  if (result != WifiMgr::Result::Connected && result != WifiMgr::Result::AlreadyConnected) {
+    DEBUG_PRINTLN("WifiMgr: Unable to connect to WiFi; skipping time sync.");
+    return;
   }
-  
+
   // Set domains to get time from
   const char* time_zone = "EST5EDT,M3.2.0,M11.1.0";
   configTzTime(time_zone, "pool.ntp.org");
@@ -39,7 +31,6 @@ void wifi_set_system_time()
   // Convert nowSecs to calendar struct with date/month/year etc.
   struct tm timeinfo;
   localtime_r(&nowSecs, &timeinfo); 
-                                 
 
   // Update RTC time with updated WiFi sync'd time
   rtc.setTime(timeinfo);
@@ -49,8 +40,7 @@ void wifi_set_system_time()
   DEBUG_PRINTF("WiFi:  localtime_r: %s\n", asctime_r(&timeinfo, buf));
 
   // Turn off Wifi
-  WiFi.disconnect();
-  WiFi.mode(WIFI_OFF);
+  WifiMgr::disconnect();
 }
 
 void init_clock()
