@@ -27,5 +27,6 @@ fp-lib-table
 # FreeCAD Project Files to Ignore
 *.FCStd.lock
 *.FCBak
-test/
-eez-ui/
+
+# EEZ-Studio build files
+eez-ui/espip-boy/src/ui/*
