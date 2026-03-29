@@ -32,6 +32,8 @@ bool fetching_weather() {
 
 void init_weather_service()
 {
+    
+    return;
     if (weatherTaskHandle == NULL) {
         xTaskCreatePinnedToCore(
             weatherTask,
